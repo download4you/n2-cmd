@@ -5,7 +5,7 @@
 namespace {
 bool isDefaultTitle(const QString& title) {
     const QString low = title.toLower();
-    if (low.startsWith(QStringLiteral("administrator:"))) return true;
+    if (low.startsWith(QStringLiteral("administrator:")) || low == QStringLiteral("administrator")) return true;
     if (low.contains(QStringLiteral("windows powershell")) || low.contains(QStringLiteral("command prompt"))) return true;
     if (low.contains(QStringLiteral("\\system32\\cmd.exe")) || low.contains(QStringLiteral("/system32/cmd.exe"))) return true;
     if (low.contains(QStringLiteral("cmd.exe - ")) || low.contains(QStringLiteral("powershell.exe - "))

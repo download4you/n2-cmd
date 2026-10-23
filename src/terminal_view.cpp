@@ -433,6 +433,12 @@ void TerminalView::keyPressEvent(QKeyEvent* event) {
     const auto mods = event->modifiers(); const int key = event->key();
     const bool ctrl = mods.testFlag(Qt::ControlModifier), shift = mods.testFlag(Qt::ShiftModifier), alt = mods.testFlag(Qt::AltModifier);
     if (!running_ && (key == Qt::Key_Return || key == Qt::Key_Enter)) { restart(); event->accept(); return; }
+    if ((key == Qt::Key_Return || key == Qt::Key_Enter) && shift && !ctrl && !alt) {
+        // TUI editors such as Codex use Ctrl+J as the insert-newline binding.
+        sendRaw(QByteArray(1, '\n'));
+        event->accept();
+        return;
+    }
     if (key == Qt::Key_Escape && !selectedText().isEmpty()) { clearSelection(); event->accept(); return; }
     if (ctrl && !alt && key == Qt::Key_C && (shift || !selectedText().isEmpty())) { copySelection(); event->accept(); return; }
     if (ctrl && !alt && key == Qt::Key_X && !selectedText().isEmpty()) { copySelection(true); event->accept(); return; }
