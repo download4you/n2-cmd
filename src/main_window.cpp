@@ -378,10 +378,9 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event) {
 }
 
 void MainWindow::updateWindowMask() {
-    if (isMaximized() || isFullScreen()) { clearMask(); return; }
-    QPainterPath path;
-    path.addRoundedRect(QRectF(rect()).adjusted(0, 0, -1, -1), 14, 14);
-    setMask(QRegion(path.toFillPolygon().toPolygon()));
+    // The rounded corners are painted by Backdrop. A native mask clips the
+    // right and bottom edges under fractional display scaling.
+    clearMask();
 }
 
 void MainWindow::restoreGeometryFromSettings() {

@@ -33,8 +33,9 @@ target_link_libraries(n2_terminal PUBLIC n2_state Qt6::Widgets vterm)
 add_library(n2_ui STATIC src/main_window.cpp src/main_window.h src/settings_dialog.cpp src/settings_dialog.h
     src/backdrop.cpp src/backdrop.h src/chrome.cpp src/chrome.h)
 target_link_libraries(n2_ui PUBLIC n2_terminal)
-qt_add_executable(n2-cmd WIN32 src/main.cpp src/resources.qrc src/windows.rc)
+qt_add_executable(n2-cmd WIN32 src/main.cpp src/resources.qrc src/windows.rc src/app.manifest)
 target_link_libraries(n2-cmd PRIVATE n2_ui)
+target_link_options(n2-cmd PRIVATE /MANIFEST:NO)
 target_compile_definitions(n2-cmd PRIVATE N2_CMD_VERSION="${PROJECT_VERSION}")
 
 include(CTest)

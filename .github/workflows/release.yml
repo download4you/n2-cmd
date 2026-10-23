@@ -64,11 +64,12 @@ jobs:
           $runtime = Get-ChildItem dist -Filter 'n2-cmd-*.runtime.json' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
           $files = @(
             $setup.FullName,
-            $setup.FullName + '.sha256',
+            ($setup.FullName + '.sha256'),
             $zip.FullName,
-            $zip.FullName + '.sha256'
+            ($zip.FullName + '.sha256')
           )
           if ($runtime) { $files += $runtime.FullName }
+          $files += @(Get-ChildItem docs\screenshots -Filter '*.png' | Select-Object -ExpandProperty FullName)
           & gh release create $tag @files --title "n2-cmd 1.0.0" --notes-file docs/RELEASE-NOTES-1.0.0.md
           if ($LASTEXITCODE -ne 0) { throw 'GitHub release creation failed.' }
 

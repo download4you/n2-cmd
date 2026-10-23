@@ -7,6 +7,9 @@ bool isDefaultTitle(const QString& title) {
     const QString low = title.toLower();
     if (low.startsWith(QStringLiteral("administrator:"))) return true;
     if (low.contains(QStringLiteral("windows powershell")) || low.contains(QStringLiteral("command prompt"))) return true;
+    if (low.contains(QStringLiteral("\\system32\\cmd.exe")) || low.contains(QStringLiteral("/system32/cmd.exe"))) return true;
+    if (low.contains(QStringLiteral("cmd.exe - ")) || low.contains(QStringLiteral("powershell.exe - "))
+        || low.contains(QStringLiteral("pwsh.exe - "))) return true;
     if (low.endsWith(QStringLiteral("powershell.exe")) || low.endsWith(QStringLiteral("pwsh.exe"))
         || low.endsWith(QStringLiteral("cmd.exe"))) return true;
     return low == QStringLiteral("powershell") || low == QStringLiteral("cmd") || low == QStringLiteral("conhost");

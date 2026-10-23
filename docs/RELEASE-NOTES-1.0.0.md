@@ -5,6 +5,14 @@ with C, C++ and Lua: Qt 6 Widgets for the interface, Win32 ConPTY for shells,
 libvterm for terminal parsing, and Lua for defaults and quick commands. Python
 is not required at runtime.
 
+## Screenshots
+
+![n2-cmd main window](https://raw.githubusercontent.com/download4you/n2-cmd/main/docs/screenshots/main.png)
+
+![n2-cmd settings](https://raw.githubusercontent.com/download4you/n2-cmd/main/docs/screenshots/settings.png)
+
+![n2-cmd quick commands](https://raw.githubusercontent.com/download4you/n2-cmd/main/docs/screenshots/quick-menu.png)
+
 ## Highlights
 
 - Persian shaping, mixed RTL/LTR text, selection, clipboard, IME and bidi-aware cursor hit-testing.

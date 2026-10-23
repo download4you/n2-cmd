@@ -26,6 +26,14 @@ option ranges and all 28 command names are listed in [FEATURES.md](docs/FEATURES
 Optional commands such as `python --version` inspect an installed tool; they do
 not make that tool an application dependency.
 
+## Screenshots
+
+![n2-cmd main window](docs/screenshots/main.png)
+
+![Settings](docs/screenshots/settings.png)
+
+![Quick commands](docs/screenshots/quick-menu.png)
+
 ## Install on Windows
 
 Download `n2-cmd-1.0.0-windows-x64-setup.exe` from GitHub Releases and run it.
@@ -34,6 +42,12 @@ creates a Start Menu entry and optional desktop shortcut, and registers an
 uninstaller. Administrator rights are not required.
 
 Windows 10 version 1809 or later is required for ConPTY; Windows 11 is supported.
+
+## Uninstall
+
+Use **Settings > Apps > Installed apps > n2-cmd > Uninstall**, or open
+**Start Menu > n2-cmd > Uninstall n2-cmd**. The uninstaller removes the program
+files and shortcuts. Settings under `%LOCALAPPDATA%\n2-cmd` are left in place.
 
 ## Run a portable release
 
