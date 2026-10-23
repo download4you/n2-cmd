@@ -27,6 +27,7 @@ public:
     void setTabs(const QStringList& titles, int activeIndex);
     void setAccent(const QString& accent);
     void setMaximized(bool maximized);
+    void setStayOnTop(bool enabled);
     QPoint quickAnchor() const;
     TerminalTabBar* tabBar() const { return tabs_; }
 signals:
@@ -38,6 +39,7 @@ signals:
     void profileMenuRequested(QPoint position);
     void quickMenuRequested(QPoint position);
     void settingsRequested();
+    void stayOnTopRequested();
     void minimizeRequested();
     void maximizeRequested();
     void closeRequested();
@@ -49,7 +51,9 @@ private:
     TerminalTabBar* tabs_;
     QLabel* brand_;
     QToolButton* quick_;
+    QToolButton* pin_;
     QToolButton* maximize_;
+    QString accent_ = QStringLiteral("#3ddc97");
 };
 
 class TerminalStatusBar : public QWidget {

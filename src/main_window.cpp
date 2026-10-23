@@ -30,6 +30,7 @@
 #include <QVBoxLayout>
 #include <QWindow>
 #include <algorithm>
+#include <windows.h>
 
 namespace {
 QAction* namedAction(QMenu* menu, const QString& label, const QString& name) {
@@ -69,6 +70,7 @@ MainWindow::MainWindow(SettingsStore* store, QVector<ShellProfile> profiles, QWi
     connect(topbar_, &TopBar::profileMenuRequested, this, &MainWindow::showProfileMenu);
     connect(topbar_, &TopBar::quickMenuRequested, this, &MainWindow::showQuickMenu);
     connect(topbar_, &TopBar::settingsRequested, this, &MainWindow::openSettings);
+    connect(topbar_, &TopBar::stayOnTopRequested, this, &MainWindow::toggleStayOnTop);
     connect(topbar_, &TopBar::minimizeRequested, this, &QWidget::showMinimized);
     connect(topbar_, &TopBar::maximizeRequested, this, &MainWindow::toggleMaximized);
     connect(topbar_, &TopBar::closeRequested, this, &QWidget::close);
@@ -324,6 +326,12 @@ void MainWindow::zoom(int delta) {
 void MainWindow::recordError(const QString& message) { lastError_ = message; emit errorOccurred(message); }
 void MainWindow::showError(const QString& message) { recordError(message); QMessageBox::warning(this, "n2-cmd", message); }
 void MainWindow::toggleMaximized() { if (isMaximized()) showNormal(); else showMaximized(); }
+void MainWindow::toggleStayOnTop() {
+    stayOnTop_ = !stayOnTop_;
+    SetWindowPos(reinterpret_cast<HWND>(winId()), stayOnTop_ ? HWND_TOPMOST : HWND_NOTOPMOST,
+                 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    topbar_->setStayOnTop(stayOnTop_);
+}
 void MainWindow::toggleFullscreen() {
     if (isFullScreen()) { showNormal(); if (maximizedBeforeFullscreen_) showMaximized(); }
     else { maximizedBeforeFullscreen_ = isMaximized(); showFullScreen(); }

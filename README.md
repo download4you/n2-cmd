@@ -179,6 +179,8 @@ to 2,000 Unicode characters. See [FEATURES.md](docs/FEATURES.md) for details.
 | Save output | Ctrl+Shift+S |
 | Copy/paste | Ctrl+Shift+C / Ctrl+Shift+V |
 | New line in Codex and other TUI editors | Shift+Enter |
+| Scroll back | Mouse wheel; click or drag the right scrollbar |
+| Keep the window above other windows | Pin button in the header |
 | Zoom | Ctrl+mouse wheel |
 | Select text | Mouse drag |
 | Copy, paste and tab actions | Right-click context menus |

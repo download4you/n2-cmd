@@ -17,6 +17,8 @@ is not required at runtime.
 
 - Persian shaping, mixed RTL/LTR text, selection, clipboard, IME and bidi-aware cursor hit-testing.
 - Shift+Enter inserts a new line in Codex and other TUI editors.
+- Scrollback can be navigated by clicking or dragging the right-hand scrollbar.
+- A header pin button keeps the window above other windows.
 - Tabs with shell selection, duplicate, rename/reset, restart, close-other-tabs and output export.
 - 28 built-in quick commands with shell-specific mappings, pins and custom favorites.
 - Wallpaper, opacity, dim, blur, terminal tint, font, size, accent, scrollback and copy-on-select settings.

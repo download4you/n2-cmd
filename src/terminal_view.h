@@ -69,6 +69,8 @@ private:
     int scrollOffset_ = 0;
     QPoint anchor_{-1, -1}, focus_{-1, -1};
     bool dragging_ = false, rectangular_ = false, visualSelection_ = false, running_ = false, shuttingDown_ = false, blink_ = true;
+    bool scrollbarDragging_ = false;
+    qreal scrollbarGrabOffset_ = 0;
     bool lastWriteOk_ = true;
     QElapsedTimer clickTimer_;
     QPoint lastClickPosition_;
@@ -91,4 +93,7 @@ private:
     void showToast(const QString& text);
     void sendKey(QKeyEvent* event);
     void sendRaw(const QByteArray& bytes);
+    void sendWin32Key(int virtualKey, int scanCode, int unicode, int state);
+    QRectF scrollBarTrack() const;
+    QRectF scrollBarThumb() const;
 };

@@ -51,6 +51,7 @@ public slots:
     void zoom(int delta);
     void toggleMaximized();
     void toggleFullscreen();
+    void toggleStayOnTop();
 signals:
     void tabsChanged();
     void errorOccurred(const QString& message);
@@ -86,6 +87,7 @@ private:
     quint64 nextId_ = 1;
     bool autoStart_, closing_ = false;
     bool maximizedBeforeFullscreen_ = false;
+    bool stayOnTop_ = false;
     Backdrop* backdrop_ = nullptr;
     TopBar* topbar_ = nullptr;
     TerminalStatusBar* status_ = nullptr;

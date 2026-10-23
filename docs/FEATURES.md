@@ -18,6 +18,9 @@ and Lua supplies configuration. Python is not an application dependency.
 | Copy on select | Enabled or disabled |
 | Accent | Cyan, Violet, Mint, Amber and Rose; Mint default |
 | Scrollback | 500-50,000 retained lines; 6,000 default |
+| Scrollback navigation | Mouse wheel; click or drag the right-hand scrollbar |
+| TUI newline | Shift+Enter sends a native Shift+Enter key record |
+| Always on top | Pin button in the header |
 | Default shell | Any detected profile |
 | Window state | Saved normal dimensions, position and maximized state; negative monitor coordinates retained |
 | Reset appearance | Restores visual defaults while preserving shell, selection behavior, favorites, pins and geometry |

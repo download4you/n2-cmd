@@ -130,6 +130,24 @@ void TerminalView::resizeEvent(QResizeEvent* event) { QWidget::resizeEvent(event
 void TerminalView::invalidateLayouts() { layoutDirty_ = true; }
 int TerminalView::firstVisibleRow() const { return std::max(0, model_.historyRows() - scrollOffset_); }
 
+QRectF TerminalView::scrollBarTrack() const {
+    const int history = model_.historyRows();
+    const qreal height = model_.screenRows() * cellHeight_;
+    if (history <= 0 || height <= 0) return {};
+    return QRectF(width() - 12.0, topPadding_, 6.0, height);
+}
+
+QRectF TerminalView::scrollBarThumb() const {
+    const QRectF track = scrollBarTrack();
+    if (track.isEmpty()) return {};
+    const qreal visible = std::max(1, model_.screenRows());
+    const qreal total = std::max<qreal>(visible, model_.rowCount());
+    const qreal height = std::clamp(track.height() * visible / total, 28.0, track.height());
+    const qreal ratio = 1.0 - double(scrollOffset_) / std::max(1, model_.historyRows());
+    const qreal top = track.top() + (track.height() - height) * std::clamp(ratio, 0.0, 1.0);
+    return QRectF(track.left(), top, track.width(), height);
+}
+
 void TerminalView::ensureLayouts() const {
     if (!layoutDirty_) return;
     layouts_.clear(); layouts_.resize(model_.rowCount());
@@ -336,11 +354,11 @@ void TerminalView::paintEvent(QPaintEvent*) {
         painter.setPen(QPen(edge, 1));
         painter.drawLine(0, height() - 1, width(), height() - 1);
     }
-    if (model_.historyRows()) {
-        const qreal track = model_.screenRows() * cellHeight_;
-        const qreal thumb = std::max(24.0, track * model_.screenRows() / model_.rowCount());
-        const qreal top = topPadding_ + (track - thumb) * (1.0 - double(scrollOffset_) / model_.historyRows());
-        painter.fillRect(QRectF(width() - 9, top, 4, thumb), QColor(settings_->settings.accent));
+    const QRectF track = scrollBarTrack();
+    if (!track.isEmpty()) {
+        painter.fillRect(track, QColor(255, 255, 255, 18));
+        QColor thumb(settings_->settings.accent); thumb.setAlpha(165);
+        painter.fillRect(scrollBarThumb(), thumb);
     }
     painter.setFont(font_);
     if (!toast_.isEmpty()) {
@@ -407,6 +425,20 @@ void TerminalView::sendRaw(const QByteArray& bytes) {
     scrollOffset_ = 0; blink_ = true; invalidateLayouts(); update();
 }
 
+void TerminalView::sendWin32Key(int virtualKey, int scanCode, int unicode, int state) {
+    QByteArray sequence = "\x1b[";
+    sequence += QByteArray::number(virtualKey); sequence += ';';
+    sequence += QByteArray::number(scanCode); sequence += ';';
+    sequence += QByteArray::number(unicode); sequence += ";1;";
+    sequence += QByteArray::number(state); sequence += ";1_";
+    sequence += "\x1b[";
+    sequence += QByteArray::number(virtualKey); sequence += ';';
+    sequence += QByteArray::number(scanCode); sequence += ';';
+    sequence += QByteArray::number(unicode); sequence += ";0;";
+    sequence += QByteArray::number(state); sequence += ";1_";
+    sendRaw(sequence);
+}
+
 void TerminalView::sendKey(QKeyEvent* event) {
     const auto mods = modifiers(event->modifiers());
     VTermKey key = VTERM_KEY_NONE;
@@ -434,8 +466,8 @@ void TerminalView::keyPressEvent(QKeyEvent* event) {
     const bool ctrl = mods.testFlag(Qt::ControlModifier), shift = mods.testFlag(Qt::ShiftModifier), alt = mods.testFlag(Qt::AltModifier);
     if (!running_ && (key == Qt::Key_Return || key == Qt::Key_Enter)) { restart(); event->accept(); return; }
     if ((key == Qt::Key_Return || key == Qt::Key_Enter) && shift && !ctrl && !alt) {
-        // TUI editors such as Codex use Ctrl+J as the insert-newline binding.
-        sendRaw(QByteArray(1, '\n'));
+        // Send a real Shift+Enter key record; a raw LF is read as Ctrl+Enter by ConPTY.
+        sendWin32Key(13, 28, 13, 0x10);
         event->accept();
         return;
     }
@@ -462,7 +494,10 @@ void TerminalView::keyPressEvent(QKeyEvent* event) {
         if (key == Qt::Key_BracketRight) { sendRaw(QByteArray(1, '\x1d')); event->accept(); return; }
         if (key == Qt::Key_AsciiCircum) { sendRaw(QByteArray(1, '\x1e')); event->accept(); return; }
         if (key == Qt::Key_Underscore) { sendRaw(QByteArray(1, '\x1f')); event->accept(); return; }
-        if (key == Qt::Key_I || key == Qt::Key_J || key == Qt::Key_M) {
+        if (key == Qt::Key_J) {
+            sendWin32Key(74, 36, 10, 0x08); event->accept(); return;
+        }
+        if (key == Qt::Key_I || key == Qt::Key_M) {
             sendRaw(QByteArray(1, char(key - Qt::Key_A + 1))); event->accept(); return;
         }
     }
@@ -471,6 +506,24 @@ void TerminalView::keyPressEvent(QKeyEvent* event) {
 
 void TerminalView::mousePressEvent(QMouseEvent* event) {
     setFocus();
+    const QPointF position = event->position();
+    const QRectF track = scrollBarTrack();
+    const QRectF thumb = scrollBarThumb();
+    if (event->button() == Qt::LeftButton && !track.isEmpty()
+        && position.x() >= track.left() - 5 && position.x() <= track.right() + 5
+        && position.y() >= track.top() - 3 && position.y() <= track.bottom() + 3) {
+        scrollbarDragging_ = true;
+        if (thumb.contains(position)) {
+            scrollbarGrabOffset_ = position.y() - thumb.top();
+        } else {
+            scrollbarGrabOffset_ = thumb.height() / 2.0;
+            const qreal span = std::max(1.0, track.height() - thumb.height());
+            const qreal ratio = std::clamp((position.y() - track.top() - scrollbarGrabOffset_) / span, 0.0, 1.0);
+            scrollBy(qRound((1.0 - ratio) * model_.historyRows()) - scrollOffset_);
+        }
+        event->accept();
+        return;
+    }
     const auto cell = cellAt(event->position());
     if (model_.mouseReporting() && !event->modifiers().testFlag(Qt::ShiftModifier)) {
         const int button = event->button() == Qt::LeftButton ? 1 : event->button() == Qt::MiddleButton ? 2 : 3;
@@ -492,6 +545,17 @@ void TerminalView::mousePressEvent(QMouseEvent* event) {
     QWidget::mousePressEvent(event);
 }
 void TerminalView::mouseMoveEvent(QMouseEvent* event) {
+    if (scrollbarDragging_) {
+        const QRectF track = scrollBarTrack();
+        const QRectF thumb = scrollBarThumb();
+        if (!track.isEmpty()) {
+            const qreal span = std::max(1.0, track.height() - thumb.height());
+            const qreal ratio = std::clamp((event->position().y() - track.top() - scrollbarGrabOffset_) / span, 0.0, 1.0);
+            scrollBy(qRound((1.0 - ratio) * model_.historyRows()) - scrollOffset_);
+        }
+        event->accept();
+        return;
+    }
     const auto cell = cellAt(event->position());
     if (model_.mouseReporting() && !event->modifiers().testFlag(Qt::ShiftModifier)) {
         model_.mouseMove(cell.y() - model_.historyRows(), cell.x(), modifiers(event->modifiers())); event->accept(); return;
@@ -502,9 +566,18 @@ void TerminalView::mouseMoveEvent(QMouseEvent* event) {
         focus_ = {std::clamp(int((event->position().x() - leftPadding_) / cellWidth_), 0, model_.columns() - 1), cell.y()};
         update(); event->accept(); return;
     }
+    const QRectF track = scrollBarTrack();
+    setCursor(!track.isEmpty() && event->position().x() >= track.left() - 5
+        && event->position().x() <= track.right() + 5 ? Qt::PointingHandCursor : Qt::IBeamCursor);
     QWidget::mouseMoveEvent(event);
 }
 void TerminalView::mouseReleaseEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton && scrollbarDragging_) {
+        scrollbarDragging_ = false;
+        setCursor(Qt::IBeamCursor);
+        event->accept();
+        return;
+    }
     if (model_.mouseReporting() && !event->modifiers().testFlag(Qt::ShiftModifier)) {
         const auto cell = cellAt(event->position()); const int button = event->button() == Qt::LeftButton ? 1 : event->button() == Qt::MiddleButton ? 2 : 3;
         model_.mouse(cell.y() - model_.historyRows(), cell.x(), button, false, modifiers(event->modifiers())); event->accept(); return;
@@ -521,7 +594,15 @@ void TerminalView::selectWord(QPoint point) {
     anchor_ = {first, point.y()}; focus_ = {last, point.y()}; update();
 }
 void TerminalView::selectLine(QPoint point) { visualSelection_ = rectangular_ = false; anchor_ = {0, point.y()}; focus_ = {model_.columns(), point.y()}; update(); }
-void TerminalView::mouseDoubleClickEvent(QMouseEvent* event) { if (event->button() == Qt::LeftButton) { clickCount_ = 2; clickTimer_.restart(); lastClickPosition_ = event->position().toPoint(); selectWord(cellAt(event->position())); dragging_ = false; if (settings_->settings.copy_on_select) copySelection(); event->accept(); } else QWidget::mouseDoubleClickEvent(event); }
+void TerminalView::mouseDoubleClickEvent(QMouseEvent* event) {
+    const QRectF track = scrollBarTrack();
+    if (event->button() == Qt::LeftButton && !track.isEmpty() && event->position().x() >= track.left() - 5
+        && event->position().x() <= track.right() + 5) {
+        event->accept();
+        return;
+    }
+    if (event->button() == Qt::LeftButton) { clickCount_ = 2; clickTimer_.restart(); lastClickPosition_ = event->position().toPoint(); selectWord(cellAt(event->position())); dragging_ = false; if (settings_->settings.copy_on_select) copySelection(); event->accept(); } else QWidget::mouseDoubleClickEvent(event);
+}
 void TerminalView::wheelEvent(QWheelEvent* event) {
     const int steps = event->angleDelta().y() ? event->angleDelta().y() / 120 : event->pixelDelta().y() / 24;
     if (event->modifiers().testFlag(Qt::ControlModifier)) emit zoomRequested(steps >= 0 ? 1 : -1);

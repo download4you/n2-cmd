@@ -24,6 +24,13 @@ QIcon controlIcon(const QString& kind, const QColor& color = QColor("#a4b2c7")) 
     else if (kind == "maximize") p.drawRect(QRectF(7, 7, 10, 10));
     else if (kind == "restore") { p.drawRect(QRectF(6, 9, 9, 9)); p.drawLine(9, 6, 18, 6); p.drawLine(18, 6, 18, 15); }
     else if (kind == "plus") { p.drawLine(7, 12, 17, 12); p.drawLine(12, 7, 12, 17); }
+    else if (kind == "pin") {
+        QPainterPath pin;
+        pin.moveTo(9, 4); pin.lineTo(15, 4); pin.lineTo(13, 9);
+        pin.lineTo(17, 13); pin.lineTo(7, 13); pin.lineTo(11, 9); pin.closeSubpath();
+        p.drawPath(pin);
+        p.drawLine(QPointF(12, 13), QPointF(12, 21));
+    }
     else if (kind == "quick") {
         QPainterPath bolt;
         bolt.moveTo(14, 3); bolt.lineTo(6, 14); bolt.lineTo(11, 14);
@@ -100,12 +107,14 @@ TopBar::TopBar(QWidget* parent) : QWidget(parent) {
     brand_->setAccessibleName(QStringLiteral("n2-cmd"));
     title->addWidget(brand_);
     title->addStretch();
+    pin_ = button(this, "stayOnTopButton", "Always on top", "pin");
+    pin_->setCheckable(true);
     quick_ = button(this, "quickButton", "Quick commands (Ctrl+Shift+P)", "quick");
     auto* settings = button(this, "settingsButton", "Settings (Ctrl+,)", "settings");
     auto* minimize = button(this, "minimizeButton", "Minimize", "minimize");
     maximize_ = button(this, "maximizeButton", "Maximize", "maximize");
     auto* close = button(this, "closeWindowButton", "Close window", "close");
-    for (auto* b : {quick_, settings, minimize, maximize_, close}) title->addWidget(b);
+    for (auto* b : {pin_, quick_, settings, minimize, maximize_, close}) title->addWidget(b);
     outer->addLayout(title);
     auto* navigation = new QHBoxLayout;
     navigation->setContentsMargins(0, 0, 0, 0);
@@ -125,6 +134,7 @@ TopBar::TopBar(QWidget* parent) : QWidget(parent) {
     connect(plus, &QToolButton::clicked, this, &TopBar::newTabRequested);
     connect(plus, &QWidget::customContextMenuRequested, this, [this, plus](QPoint p) { emit profileMenuRequested(plus->mapToGlobal(p)); });
     connect(quick_, &QToolButton::clicked, this, [this] { emit quickMenuRequested(quickAnchor()); });
+    connect(pin_, &QToolButton::clicked, this, &TopBar::stayOnTopRequested);
     connect(settings, &QToolButton::clicked, this, &TopBar::settingsRequested);
     connect(minimize, &QToolButton::clicked, this, &TopBar::minimizeRequested);
     connect(maximize_, &QToolButton::clicked, this, &TopBar::maximizeRequested);
@@ -143,8 +153,10 @@ void TopBar::setTabs(const QStringList& titles, int activeIndex) {
 }
 
 void TopBar::setAccent(const QString& accent) {
+    accent_ = accent;
     brand_->setStyleSheet(QStringLiteral("color:%1;font:600 12pt 'Segoe UI';letter-spacing:1px;").arg(accent));
     quick_->setIcon(controlIcon("quick", QColor(accent)));
+    setStayOnTop(pin_->isChecked());
     setStyleSheet(QStringLiteral(
         "#topBar{background:rgba(10,16,27,190);border-bottom:1px solid rgba(255,255,255,22);border-top-left-radius:12px;border-top-right-radius:12px;}"
         "QToolButton{border:0;border-radius:6px;background:transparent;} QToolButton:hover{background:rgba(255,255,255,22);}"
@@ -160,6 +172,14 @@ void TopBar::setMaximized(bool maximized) {
     maximize_->setIcon(controlIcon(maximized ? "restore" : "maximize"));
     maximize_->setAccessibleName(maximized ? "Restore" : "Maximize");
     maximize_->setToolTip(maximized ? "Restore" : "Maximize");
+}
+
+void TopBar::setStayOnTop(bool enabled) {
+    pin_->setChecked(enabled);
+    pin_->setIcon(controlIcon("pin", enabled ? QColor(accent_) : QColor("#a4b2c7")));
+    const QString text = enabled ? "Always on top (on)" : "Always on top";
+    pin_->setAccessibleName(text);
+    pin_->setToolTip(text);
 }
 QPoint TopBar::quickAnchor() const { return quick_->mapToGlobal(QPoint(0, quick_->height())); }
 void TopBar::mousePressEvent(QMouseEvent* event) {
