@@ -33,16 +33,14 @@ private slots:
         const QString sample = QStringLiteral("N2_LIVE_سلام_می‌روم_😀");
         const QString savedPath = directory.filePath(QStringLiteral("خروجی shell.txt"));
         QVERIFY(first->runCommand("echo " + sample + ">\"" + nativePath(savedPath) + '"'));
-        QTRY_VERIFY_WITH_TIMEOUT(QFileInfo::exists(savedPath), 10000);
-        QCOMPARE(QString::fromUtf8(readFile(savedPath)), sample + "\r\n");
+        QTRY_COMPARE_WITH_TIMEOUT(QString::fromUtf8(readFile(savedPath)), sample + "\r\n", 10000);
         QVERIFY(first->runCommand("echo " + sample));
         QTRY_VERIFY_WITH_TIMEOUT(first->plainText().contains(sample), 10000);
 
         const QString favoritePath = directory.filePath("favorite-proof.txt");
         QVERIFY(store.addFavorite("Proof", "echo FAVORITE>\"" + nativePath(favoritePath) + '"', &error));
         QVERIFY(window.runCustomFavorite(0));
-        QTRY_VERIFY_WITH_TIMEOUT(QFileInfo::exists(favoritePath), 10000);
-        QCOMPARE(readFile(favoritePath), QByteArray("FAVORITE\r\n"));
+        QTRY_COMPARE_WITH_TIMEOUT(readFile(favoritePath), QByteArray("FAVORITE\r\n"), 10000);
         QVERIFY(window.runQuickCommand("cwd"));
 
         const quint64 firstId = window.tabId(0);
