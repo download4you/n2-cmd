@@ -1,0 +1,421 @@
+Qt 6.8.3 runtime component notices
+Copied from qtbase-6.8.3.spdx.json and qtimageformats-6.8.3.spdx.json distributed with the official Qt 6.8.3 MSVC x64 SDK.
+n2-cmd selects LGPL-3.0-only for the Qt libraries and plugins. Original alternative-license expressions are retained below as source metadata.
+Standard license texts are in this directory. Component names may describe code included inside another library rather than a separate distributed DLL.
+
+BundledPcre2_Attribution_pcre2-sljit 10.45
+License: BSD-2-Clause
+Source: https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.45/pcre2-10.45.tar.bz2
+Copyright (c) 2009-2024 Zoltan Herczeg
+
+BundledPcre2 10.45
+License: LicenseRef-BSD-3-Clause-with-PCRE2-Binary-Like-Packages-Exception
+Source: https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.45/pcre2-10.45.tar.bz2
+Copyright (c) 1997-2024 University of Cambridge
+Copyright (c) 2010-2024 Zoltan Herczeg
+
+BundledZLIB 1.3.1
+License: Zlib
+Source: https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz
+(C) 1995-2024 Jean-loup Gailly and Mark Adler
+
+Core_Attribution_unicode-character-database 34
+License: Unicode-3.0
+Source: https://www.unicode.org/ucd/
+Copyright (C) 1991-2022 Unicode, Inc.
+
+Core_Attribution_unicode-cldr v46.1
+License: Unicode-3.0
+Source: https://cldr.unicode.org/
+Copyright (C) 2004-2023 Unicode, Inc.
+
+Core_Attribution_siphash unknown
+License: CC0-1.0
+Source: https://raw.githubusercontent.com/veorq/SipHash/adcbf09b1684a718f594faa650ffc56bacdb0777/siphash24.c
+Copyright (C) 2012-2014 Jean-Philippe Aumasson
+Copyright (C) 2012-2014 Daniel J. Bernstein <djb@cr.yp.to>
+Copyright (C) 2016 Intel Corporation
+
+Core_Attribution_blake2 ed1974ea83433eba7b2d95c5dcd9ac33cb847913
+License: CC0-1.0 OR Apache-2.0
+Source: https://github.com/BLAKE2/BLAKE2/tree/ed1974ea83433eba7b2d95c5dcd9ac33cb847913
+Copyright 2012, Samuel Neves <sneves@dei.uc.pt>
+
+Core_Attribution_md4 unknown
+License: CC0-1.0
+Source: NOASSERTION
+Written by Alexander Peslyak - better known as Solar Designer <solar@openwall.com> - in 2001, and placed in the public domain. There's absolutely no warranty.
+
+Core_Attribution_md5 unknown
+License: CC0-1.0
+Source: NOASSERTION
+Written by Colin Plumb in 1993, no copyright is claimed. Ian Jackson <ian@chiark.greenend.org.uk>.
+
+Core_Attribution_sha1 unknown
+License: LicenseRef-SHA1-Public-Domain
+Source: http://www.dominik-reichl.de/projects/csha1/
+Copyright (C) Dominik Reichl <dominik.reichl@t-online.de>
+Copyright (C) 2016 The Qt Company Ltd
+
+Core_Attribution_sha3_endian 4b9e13ead2c5b5e41ca27c65de4dd69ae0bac228
+License: BSD-2-Clause
+Source: NOASSERTION
+Copyright (c) 1998-2013, Brian Gladman, Worcester, UK. All rights reserved.
+
+Core_Attribution_sha3_keccak 3.2
+License: CC0-1.0
+Source: NOASSERTION
+Guido Bertoni, Joan Daemen, Michaël Peeters and Gilles Van Assche.
+To the extent possible under law, the implementers have waived all copyright
+and related or neighboring rights to the source code in this file.
+
+Core_Attribution_rfc6234 unknown
+License: BSD-3-Clause
+Source: NOASSERTION
+Copyright (c) 2011 IETF Trust and the persons identified as authors of the code.
+
+Core_Attribution_tinycbor 0.6.1
+License: MIT
+Source: https://github.com/intel/tinycbor/archive/v0.6.1/tinycbor-0.6.1.tar.gz
+Copyright (C) 2015-2021 Intel Corporation
+
+Core_Attribution_doubleconversion 3.3.0
+License: BSD-3-Clause
+Source: https://github.com/google/double-conversion/releases/tag/v3.3.0
+Copyright 2006-2012, the V8 project authors
+
+Core_Attribution_easing unknown
+License: BSD-3-Clause
+Source: http://robertpenner.com/easing/
+Copyright (c) 2001 Robert Penner
+
+Core_Attribution_tika-mimetypes 5101bc7fb090ed7deffe56837d7633c9485a1e5d
+License: Apache-2.0
+Source: https://github.com/apache/tika/blob/5101bc7fb090ed7deffe56837d7633c9485a1e5d/tika-core/src/main/resources/org/apache/tika/mime/tika-mimetypes.xml
+Copyright 2024 The Apache Software Foundation
+
+Core 6.8.3
+License: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Source: git://code.qt.io/qt/qtbase.git@c07c2d5a527a644d36e7853d55132ae38921682f
+Copyright (C) The Qt Company Ltd. and other contributors.
+
+BundledLibpng 1.6.47
+License: Libpng AND libpng-2.0
+Source: https://download.sourceforge.net/libpng/libpng-1.6.47.tar.xz
+Copyright (c) 1995-2025 The PNG Reference Library Authors
+Copyright (c) 2000-2025 Cosmin Truta
+Copyright (c) 1998-2018 Glenn Randers-Pehrson
+Copyright (c) 1996-1997 Andreas Dilger
+Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+Copyright (c) 2000-2017 Simon-Pierre Cadieux
+Copyright (c) 2000-2017 Eric S. Raymond
+Copyright (c) 2000-2017 Mans Rullgard
+Copyright (c) 2000-2017 Gilles Vollant
+Copyright (c) 2000-2017 James Yu
+Copyright (c) 2000-2017 Mandar Sahastrabuddhe
+Copyright (c) 1998-2000 Tom Lane
+Copyright (c) 1998-2000 Willem van Schaik
+Copyright (c) 1996-1997 John Bowler
+Copyright (c) 1996-1997 Kevin Bracey
+Copyright (c) 1996-1997 Sam Bushell
+Copyright (c) 1996-1997 Magnus Holmgren
+Copyright (c) 1996-1997 Greg Roelofs
+Copyright (c) 1996-1997 Tom Tanner
+Copyright (c) 1995-1996 Dave Martindale
+Copyright (c) 1995-1996 Paul Schmidt
+Copyright (c) 1995-1996 Tim Wegner
+
+BundledLibjpeg16bits 3.1.0
+License: IJG AND BSD-3-Clause
+Source: https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.0/libjpeg-turbo-3.1.0.tar.gz
+Copyright (C) 2009-2024 D. R. Commander
+Copyright (C) 2015, 2020 Google, Inc.
+Copyright (C) 2019-2020 Arm Limited
+Copyright (C) 2015-2016, 2018 Matthieu Darbois
+Copyright (C) 2011-2016 Siarhei Siamashka
+Copyright (C) 2015 Intel Corporation
+Copyright (C) 2013-2014 Linaro Limited
+Copyright (C) 2013-2014 MIPS Technologies, Inc.
+Copyright (C) 2009, 2012 Pierre Ossman for Cendio AB
+Copyright (C) 2009-2011 Nokia Corporation and/or its subsidiary(-ies)
+Copyright (C) 1999-2006 MIYASAKA Masaru
+Copyright (C) 1999 Ken Murchison
+Copyright (C) 1991-2020 Thomas G. Lane, Guido Vollbeding
+
+
+BundledLibjpeg12bits 3.1.0
+License: IJG AND BSD-3-Clause
+Source: https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.0/libjpeg-turbo-3.1.0.tar.gz
+Copyright (C) 2009-2024 D. R. Commander
+Copyright (C) 2015, 2020 Google, Inc.
+Copyright (C) 2019-2020 Arm Limited
+Copyright (C) 2015-2016, 2018 Matthieu Darbois
+Copyright (C) 2011-2016 Siarhei Siamashka
+Copyright (C) 2015 Intel Corporation
+Copyright (C) 2013-2014 Linaro Limited
+Copyright (C) 2013-2014 MIPS Technologies, Inc.
+Copyright (C) 2009, 2012 Pierre Ossman for Cendio AB
+Copyright (C) 2009-2011 Nokia Corporation and/or its subsidiary(-ies)
+Copyright (C) 1999-2006 MIYASAKA Masaru
+Copyright (C) 1999 Ken Murchison
+Copyright (C) 1991-2020 Thomas G. Lane, Guido Vollbeding
+
+
+BundledLibjpeg 3.1.0
+License: IJG AND BSD-3-Clause
+Source: https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.0/libjpeg-turbo-3.1.0.tar.gz
+Copyright (C) 2009-2024 D. R. Commander
+Copyright (C) 2015, 2020 Google, Inc.
+Copyright (C) 2019-2020 Arm Limited
+Copyright (C) 2015-2016, 2018 Matthieu Darbois
+Copyright (C) 2011-2016 Siarhei Siamashka
+Copyright (C) 2015 Intel Corporation
+Copyright (C) 2013-2014 Linaro Limited
+Copyright (C) 2013-2014 MIPS Technologies, Inc.
+Copyright (C) 2009, 2012 Pierre Ossman for Cendio AB
+Copyright (C) 2009-2011 Nokia Corporation and/or its subsidiary(-ies)
+Copyright (C) 1999-2006 MIYASAKA Masaru
+Copyright (C) 1999 Ken Murchison
+Copyright (C) 1991-2020 Thomas G. Lane, Guido Vollbeding
+
+
+BundledFreetype_Attribution_freetype-zlib 2.13.3
+License: Zlib
+Source: https://download.savannah.gnu.org/releases/freetype/freetype-2.13.3.tar.gz
+Copyright (C) 1995-2023 Jean-loup Gailly and Mark Adler
+
+BundledFreetype_Attribution_freetype-bdf 2.13.3
+License: MIT
+Source: https://download.savannah.gnu.org/releases/freetype/freetype-2.13.3.tar.gz
+Copyright (c) 2000 Computing Research Labs, New Mexico State University
+Copyright (c) 2001-2014 Francesco Zappa Nardelli
+
+BundledFreetype_Attribution_freetype-pcf 2.13.3
+License: MIT AND MIT-open-group
+Source: https://download.savannah.gnu.org/releases/freetype/freetype-2.13.3.tar.gz
+Copyright (c) 2001, 2012 David Turner, Robert Wilhelm, and Werner Lemberg
+Copyright (c) 2000-2014 Francesco Zappa Nardelli
+Copyright (c) 1990, 1994, 1998 The Open Group
+
+BundledFreetype 2.13.3
+License: FTL OR GPL-2.0-only
+Source: https://download.savannah.gnu.org/releases/freetype/freetype-2.13.3.tar.gz
+Copyright (c) 2007-2014 Adobe Systems Incorporated
+Copyright (c) 2004-2024 Albert Chin-A-Young
+Copyright (c) 2018-2024 Armin Hasitzka, David Turner, Robert Wilhelm, and Werner Lemberg
+Copyright (c) 2000 Computing Research Labs, New Mexico State University
+Copyright (c) 1996-2024 David Turner, Robert Wilhelm, Dominik Röttsches, and Werner Lemberg
+Copyright (c) 2004-2024 David Turner, Robert Wilhelm, Werner Lemberg and George Williams
+Copyright (c) 2022-2024 David Turner, Robert Wilhelm, Werner Lemberg, and Moazin Khatti
+Copyright (c) 2008-2024 David Turner, Robert Wilhelm, Werner Lemberg, and suzuki toshiya
+Copyright (c) 2003-2024 David Turner, Robert Wilhelm, and Werner Lemberg
+Copyright (c) 2005-2024 David Turner
+Copyright (c) 2007-2024 Derek Clegg and Michael Toftdal
+Copyright (c) 2007 Dmitry Timoshkov for Codeweavers
+Copyright (c) 2001-2015 Francesco Zappa Nardelli
+Copyright (c) 2005, 2007, 2008, 2013 George Williams
+Copyright (c) 2013-2024 Google, Inc. Google Author(s) Behdad Esfahbod and Stuart Gill
+Copyright (c) 2013-2022 Google, Inc.
+Copyright (c) 2003 Huw D M Davies for Codeweavers
+Copyright (c) 2010-2024 Joel Klinghed
+Copyright (c) 1996-2024 Just van Rossum, David Turner, Robert Wilhelm, and Werner Lemberg
+Copyright (c) 2003-2024 Masatake YAMATO and Redhat K.K.
+Copyright (c) 2004-2024 Masatake YAMATO, Redhat K.K, David Turner, Robert Wilhelm, and Werner Lemberg
+Copyright (c) 2019-2024 Nikhil Ramakrishnan, David Turner, Robert Wilhelm, and Werner Lemberg
+Copyright (c) 2009-2024 Oran Agra and Mickey Gabel
+Copyright (c) 2007-2024 Rahul Bhalerao <rahul.bhalerao@redhat.com>
+Copyright (c) 2002-2024 Roberto Alameda
+Copyright (c) 2015-2024 Werner Lemberg
+Copyright (c) 2004-2024 suzuki toshiya, Masatake YAMATO, Red Hat K.K., David Turner, Robert Wilhelm, and Werner Lemberg
+Copyright (c) 2019 nyorain
+Copyright (c) 2022-2024 David Turner, Robert Wilhelm, Werner Lemberg, George Williams, and Dominik Röttsches
+Copyright (C) 2009, 2023  Red Hat, Inc.
+
+BundledHarfbuzz 10.4.0
+License: MIT
+Source: https://github.com/harfbuzz/harfbuzz/releases/tag/10.4.0
+Copyright © 2010-2022  Google, Inc.
+Copyright © 2015-2020  Ebrahim Byagowi
+Copyright © 2019,2020  Facebook, Inc.
+Copyright © 2012,2015  Mozilla Foundation
+Copyright © 2011  Codethink Limited
+Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
+Copyright © 2009  Keith Stribley
+Copyright © 2011  Martin Hosken and SIL International
+Copyright © 2007  Chris Wilson
+Copyright © 2005,2006,2020,2021,2022,2023  Behdad Esfahbod
+Copyright © 2004,2007,2008,2009,2010,2013,2021,2022,2023  Red Hat, Inc.
+Copyright © 1998-2005  David Turner and Werner Lemberg
+Copyright © 2016  Igalia S.L.
+Copyright © 2022  Matthias Clasen
+Copyright © 2018,2021  Khaled Hosny
+Copyright © 2018,2019,2020  Adobe, Inc
+Copyright © 2013-2015  Alexei Podtelezhnikov
+
+Gui_Attribution_rhi-miniengine-d3d12-mipmap 0aa79bad78992da0b6a8279ddb9002c1753cb849
+License: MIT
+Source: https://github.com/microsoft/DirectX-Graphics-Samples
+Copyright (c) 2015 Microsoft
+
+Gui_Attribution_opengl-headers Revision 27684
+License: MIT
+Source: https://www.khronos.org/
+Copyright (c) 2013-2014 The Khronos Group Inc.
+
+Gui_Attribution_opengl-es2-headers Revision 27673
+License: MIT
+Source: https://www.khronos.org/
+Copyright (c) 2013-2014 The Khronos Group Inc.
+
+Gui_Attribution_grayraster unknown
+License: FTL OR GPL-2.0-only
+Source: http://www.freetype.org
+Copyright 2000-2016 by David Turner, Robert Wilhelm, and Werner Lemberg.
+
+Gui_Attribution_smooth-scaling-algorithm unknown
+License: BSD-2-Clause AND Imlib2
+Source: NOASSERTION
+Copyright (C) 2004, 2005 Daniel M. Duley.
+(C) Carsten Haitzler and various contributors.
+(C) Willem Monsuwe <willem@stack.nl>
+
+Gui_Attribution_xserverhelper unknown
+License: X11 AND HPND
+Source: https://www.x.org/
+Copyright (c) 1987, 1988 X Consortium
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+
+Gui_Attribution_aglfn 1.7
+License: BSD-3-Clause
+Source: https://github.com/adobe-type-tools/agl-aglfn
+Copyright 2002, 2003, 2005, 2006, 2008, 2010, 2015 Adobe Systems
+
+Gui_Attribution_vulkanmemoryallocator 3.0.1
+License: MIT
+Source: https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
+Copyright (c) 2017-2024 Advanced Micro Devices, Inc. All rights reserved.
+
+Gui_Attribution_webgradients unknown
+License: MIT
+Source: https://webgradients.com/
+Copyright (c) 2017 itmeo
+
+Gui_Attribution_icc-srgb-color-profile unknown
+License: LicenseRef-ICC-License
+Source: http://www.color.org/
+Copyright International Color Consortium, 2015
+
+Gui_Attribution_d3d12memoryallocator f128d39b7a95b4235bd228d231646278dc6c24b2
+License: MIT
+Source: https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator
+Copyright (c) 2019-2022 Advanced Micro Devices, Inc. All rights reserved.
+
+Gui_Attribution_md4c 0.5.2
+License: MIT
+Source: https://github.com/mity/md4c/releases/tag/release-0.5.2
+Copyright © 2016-2024 Martin Mitáš
+
+Gui_Attribution_zlib 1.3.1
+License: Zlib
+Source: https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz
+(C) 1995-2024 Jean-loup Gailly and Mark Adler
+
+Gui_Attribution_vulkan-xml-spec 1.3.223
+License: Apache-2.0 OR MIT
+Source: https://www.khronos.org/
+Copyright (c) 2015-2022 The Khronos Group Inc.
+
+Gui 6.8.3
+License: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Source: git://code.qt.io/qt/qtbase.git@c07c2d5a527a644d36e7853d55132ae38921682f
+Copyright (C) The Qt Company Ltd. and other contributors.
+
+Widgets 6.8.3
+License: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Source: git://code.qt.io/qt/qtbase.git@c07c2d5a527a644d36e7853d55132ae38921682f
+Copyright (C) The Qt Company Ltd. and other contributors.
+
+QWindowsIntegrationPlugin_Attribution_wintab unknown
+License: LicenseRef-Lcs-Telegraphics
+Source: NOASSERTION
+Copyright 1991-1998 by LCS/Telegraphics.
+
+QWindowsIntegrationPlugin 6.8.3
+License: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Source: git://code.qt.io/qt/qtbase.git@c07c2d5a527a644d36e7853d55132ae38921682f
+Copyright (C) The Qt Company Ltd. and other contributors.
+
+QICOPlugin 6.8.3
+License: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Source: git://code.qt.io/qt/qtbase.git@c07c2d5a527a644d36e7853d55132ae38921682f
+Copyright (C) The Qt Company Ltd. and other contributors.
+
+QJpegPlugin 6.8.3
+License: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Source: git://code.qt.io/qt/qtbase.git@c07c2d5a527a644d36e7853d55132ae38921682f
+Copyright (C) The Qt Company Ltd. and other contributors.
+
+QGifPlugin 6.8.3
+License: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Source: git://code.qt.io/qt/qtbase.git@c07c2d5a527a644d36e7853d55132ae38921682f
+Copyright (C) The Qt Company Ltd. and other contributors.
+
+QWebpPlugin_Attribution_libwebp 1.5.0
+License: BSD-3-Clause
+Source: https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.5.0.tar.gz
+Copyright (c) 2010, Google Inc. All rights reserved.
+
+QWebpPlugin 6.8.3
+License: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Source: git://code.qt.io/qt/qtimageformats.git
+Copyright (C) The Qt Company Ltd. and other contributors.
+
+LicenseRef-BSD-3-Clause-with-PCRE2-Binary-Like-Packages-Exception
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+    3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+EXEMPTION FOR BINARY LIBRARY-LIKE PACKAGES
+------------------------------------------
+
+The second condition in the BSD licence (covering binary redistributions) does not apply all the way down a chain of software. If binary package A includes PCRE2, it must respect the condition, but if package B is software that includes package A, the condition is not imposed on package B unless it uses PCRE2 independently.
+
+
+LicenseRef-ICC-License
+For the file sRGB2014.icc:
+
+Copyright International Color Consortium, 2015
+
+This profile is made available by the International Color Consortium, and may be copied,
+distributed, embedded, made, used, and sold without restriction. Altered versions of this
+profile shall have the original identification and copyright information removed and
+shall not be misrepresented as the original profile.
+
+(original source location: http://www.color.org/srgbprofiles.xalter)
+
+
+LicenseRef-Lcs-Telegraphics
+The text and information contained in this file may be freely used,
+copied, or distributed without compensation or licensing restrictions.
+
+
+LicenseRef-Qt-Commercial
+Licensees holding valid commercial Qt licenses may use this software in
+accordance with the the terms contained in a written agreement between
+you and The Qt Company. Alternatively, the terms and conditions that were
+accepted by the licensee when buying and/or downloading the
+software do apply.
+
+For the latest licensing terms and conditions, see https://www.qt.io/terms-conditions.
+For further information use the contact form at https://www.qt.io/contact-us.
+
+
+LicenseRef-SHA1-Public-Domain
+100% free public domain implementation of the SHA-1 algorithm
+by Dominik Reichl <dominik.reichl@t-online.de>
+Web: http://www.dominik-reichl.de/
+

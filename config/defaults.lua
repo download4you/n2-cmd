@@ -1,0 +1,21 @@
+-- Appearance and behavior defaults. User preferences may override these keys.
+return {
+    opacity = 0.94,
+    background = "",
+    bg_dim = 0.58,
+    bg_blur = 8,
+    terminal_tint = 0.34,
+    font_family = "Vazir Code Hack",
+    font_size = 10.0,
+    copy_on_select = true,
+    default_shell = "native",
+    pinned_commands = {},
+    favorite_commands = {},
+    accent = "#3ddc97",
+    scrollback = 6000,
+    window_width = 1240,
+    window_height = 780,
+    window_x = -1,
+    window_y = -1,
+    maximized = false,
+}

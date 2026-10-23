@@ -1,0 +1,51 @@
+name: Windows native build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-package:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Qt 6.8.3
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: qtimageformats
+          cache: true
+      - name: Build and run native tests
+        shell: pwsh
+        run: ./scripts/Build.ps1 -QtRoot $env:QT_ROOT_DIR -Test
+      - name: Create and verify release package
+        shell: pwsh
+        run: ./scripts/Package.ps1 -QtRoot $env:QT_ROOT_DIR
+      - name: Upload verified package
+        uses: actions/upload-artifact@v4
+        with:
+          name: n2-cmd-windows-x64
+          path: |
+            dist/*.zip
+            dist/*.zip.sha256
+            dist/*.runtime.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n2-cmd-test-results
+          path: |
+            build/native/*-results.txt
+            build/native/Testing/Temporary/LastTest.log
+          if-no-files-found: ignore

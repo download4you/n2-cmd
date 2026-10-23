@@ -1,0 +1,18 @@
+Microsoft Visual C++ Runtime
+
+Copyright Microsoft Corporation. All rights reserved.
+
+The release packaging script copies application-local runtime DLLs from the
+installed Visual Studio 2022 toolchain's VC/Redist/MSVC/<version>/x64/
+Microsoft.VC143.CRT directory. Those DLLs are Microsoft's Redistributable Code,
+not MIT-licensed n2-cmd source. Their redistribution is subject to the applicable
+Visual Studio license terms. Preserve this notice when redistributing them.
+
+Visual Studio 2022 redistribution list:
+https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution
+
+Microsoft Visual C++ Redistributable information:
+https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist
+
+The exact deployed runtime filenames, file sizes and SHA-256 hashes are recorded
+in package-manifest.json. The package does not modify the Microsoft runtime DLLs.

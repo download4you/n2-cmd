@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt 6.8.3
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: qtimageformats
+          cache: true
+
+      - name: Build and run native tests
+        shell: pwsh
+        run: ./scripts/Build.ps1 -QtRoot $env:QT_ROOT_DIR -Test
+
+      - name: Create and verify release package
+        shell: pwsh
+        run: ./scripts/Package.ps1 -QtRoot $env:QT_ROOT_DIR
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Build executable installer
+        shell: pwsh
+        run: |
+          $stage = Get-ChildItem dist -Directory | Where-Object { $_.Name -like 'n2-cmd-*-windows-x64-*' } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $stage) { throw 'Release package directory was not found.' }
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path -LiteralPath $iscc)) { throw 'ISCC.exe was not found.' }
+          & $iscc "/DMySourceDir=$($stage.FullName)" 'installer\n2-cmd.iss'
+          if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
+          $setup = Get-ChildItem dist -Filter 'n2-cmd-*-setup.exe' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $setup) { throw 'Installer was not created.' }
+          $hash = (Get-FileHash -LiteralPath $setup.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          [IO.File]::WriteAllText($setup.FullName + '.sha256', ($hash + '  ' + $setup.Name + "`n"), [Text.UTF8Encoding]::new($false))
+
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $zip = Get-ChildItem dist -Filter 'n2-cmd-*.zip' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $zip) { throw 'Portable ZIP was not found.' }
+          $setup = Get-ChildItem dist -Filter 'n2-cmd-*-setup.exe' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $setup) { throw 'Installer was not found.' }
+          $runtime = Get-ChildItem dist -Filter 'n2-cmd-*.runtime.json' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          $files = @(
+            $setup.FullName,
+            $setup.FullName + '.sha256',
+            $zip.FullName,
+            $zip.FullName + '.sha256'
+          )
+          if ($runtime) { $files += $runtime.FullName }
+          & gh release create $tag @files --title "n2-cmd 1.0.0" --notes-file docs/RELEASE-NOTES-1.0.0.md
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub release creation failed.' }
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: n2-cmd-release-assets
+          path: |
+            dist/*.zip
+            dist/*.zip.sha256
+            dist/*-setup.exe
+            dist/*-setup.exe.sha256
+            dist/*.runtime.json
+          if-no-files-found: error
+          retention-days: 30

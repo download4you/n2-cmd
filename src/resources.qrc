@@ -1,0 +1,7 @@
+<RCC><qresource prefix="/">
+  <file alias="config/defaults.lua">../config/defaults.lua</file>
+  <file alias="config/quick_commands.lua">../config/quick_commands.lua</file>
+  <file alias="assets/wallpaper.jpg">../assets/wallpaper.jpg</file>
+  <file alias="assets/icon.png">../assets/icon.png</file>
+  <file alias="fonts/Vazir-Code-Hack.ttf">../fonts/Vazir-Code-Hack.ttf</file>
+</qresource></RCC>

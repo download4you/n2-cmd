@@ -1,0 +1,16 @@
+/build/
+/dist/
+/out/
+/tools/
+/.vs/
+*.user
+*.suo
+*.pdb
+*.ilk
+*.obj
+*.log
+*.zip
+settings.json
+preferences.lua
+wallpaper_custom.*
+*.tmp
