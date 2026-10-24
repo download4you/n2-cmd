@@ -80,7 +80,6 @@ private:
     void saveGeometryToSettings();
     void updateWindowMask();
     void updateBackdropEffect();
-    void scheduleBackdropCapture();
     void captureBackdrop();
     void beginWindowMove();
     void applySnapFromCursor();
@@ -104,7 +103,6 @@ private:
     QPointer<SettingsDialog> settingsDialog_;
     QString lastError_;
     QTimer* geometryTimer_ = nullptr;
-    QTimer* backdropTimer_ = nullptr;
     QPointer<QWidget> resizeCursorOwner_;
     QCursor previousCursor_;
 };

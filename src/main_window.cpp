@@ -1,4 +1,4 @@
-#include "main_window.h"
+﻿#include "main_window.h"
 #include "backdrop.h"
 #include "chrome.h"
 #include "settings_dialog.h"
@@ -65,8 +65,7 @@ MainWindow::MainWindow(SettingsStore* store, QVector<ShellProfile> profiles, QWi
     layout->addWidget(topbar_); layout->addWidget(stack_, 1); layout->addWidget(status_);
     geometryTimer_ = new QTimer(this); geometryTimer_->setSingleShot(true); geometryTimer_->setInterval(350);
     connect(geometryTimer_, &QTimer::timeout, this, &MainWindow::saveGeometryToSettings);
-    backdropTimer_ = new QTimer(this); backdropTimer_->setSingleShot(true); backdropTimer_->setInterval(220);
-    connect(backdropTimer_, &QTimer::timeout, this, &MainWindow::captureBackdrop);
+
     connect(topbar_, &TopBar::tabActivated, this, &MainWindow::setCurrentIndex);
     connect(topbar_, &TopBar::tabCloseRequested, this, [this](int i) { closeTab(i); });
     connect(topbar_, &TopBar::tabRenameRequested, this, &MainWindow::renameTabDialog);
@@ -85,6 +84,7 @@ MainWindow::MainWindow(SettingsStore* store, QVector<ShellProfile> profiles, QWi
     qApp->installEventFilter(this);
     restoreGeometryFromSettings(); applySettings();
     newTab(store_->settings.default_shell);
+    captureBackdrop();
 }
 
 MainWindow::~MainWindow() {
@@ -320,13 +320,11 @@ void MainWindow::applySettings() {
     palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor("#8494aa")); qApp->setPalette(palette);
     backdrop_->applySettings(); topbar_->setAccent(store_->settings.accent); status_->setAccent(store_->settings.accent);
     for (const auto& tab : tabs_) if (tab.view) tab.view->applySettings(); updateStatus();
-    scheduleBackdropCapture();
 }
 void MainWindow::openSettings() {
     if (settingsDialog_) { settingsDialog_->raise(); settingsDialog_->activateWindow(); return; }
     settingsDialog_ = new SettingsDialog(store_, profiles_, this); settingsDialog_->setAttribute(Qt::WA_DeleteOnClose);
     connect(settingsDialog_, &SettingsDialog::settingsChanged, this, &MainWindow::applySettings);
-    connect(settingsDialog_, &QDialog::finished, this, [this] { scheduleBackdropCapture(); });
     settingsDialog_->open();
 }
 void MainWindow::zoom(int delta) {
@@ -357,7 +355,6 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, qintptr
         snapArmed_ = false;
         if (moved) QTimer::singleShot(0, this, &MainWindow::applySnapFromCursor);
     }
-    if (msg->message == WM_EXITSIZEMOVE) QTimer::singleShot(160, this, &MainWindow::scheduleBackdropCapture);
     return QMainWindow::nativeEvent(eventType, message, result);
 }
 void MainWindow::applySnapFromCursor() {
@@ -467,25 +464,19 @@ void MainWindow::updateBackdropEffect() {
         setter(hwnd, &data);
     }
 }
-void MainWindow::scheduleBackdropCapture() {
-    if (!backdropTimer_ || !backdrop_) return;
-    if (store_->settings.opaque_background) { backdrop_->clearDesktopCapture(); return; }
-    if (settingsDialog_ && settingsDialog_->isVisible()) return;
-    backdropTimer_->start();
-}
 void MainWindow::captureBackdrop() {
-    if (!backdrop_ || store_->settings.opaque_background || !isVisible() || isMinimized() || isFullScreen()) {
-        if (backdrop_) backdrop_->clearDesktopCapture();
-        return;
-    }
+    if (!backdrop_) return;
     const int left = GetSystemMetrics(SM_XVIRTUALSCREEN);
     const int top = GetSystemMetrics(SM_YVIRTUALSCREEN);
     const int width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
     const int height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
     if (width <= 0 || height <= 0) return;
-    setWindowOpacity(0.0);
-    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-    QThread::msleep(40);
+    const bool visible = isVisible();
+    if (visible) {
+        setWindowOpacity(0.0);
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(40);
+    }
     HDC screen = GetDC(nullptr);
     HDC memory = CreateCompatibleDC(screen);
     HBITMAP bitmap = CreateCompatibleBitmap(screen, width, height);
@@ -504,13 +495,12 @@ void MainWindow::captureBackdrop() {
     DeleteObject(bitmap);
     DeleteDC(memory);
     ReleaseDC(nullptr, screen);
-    setWindowOpacity(1.0);
+    if (visible) setWindowOpacity(1.0);
     if (!image.isNull()) backdrop_->setDesktopCapture(image, QPoint(left, top));
 }
 void MainWindow::showEvent(QShowEvent* event) {
     QMainWindow::showEvent(event);
     updateBackdropEffect();
-    scheduleBackdropCapture();
 }
 
 void MainWindow::restoreGeometryFromSettings() {
@@ -538,7 +528,6 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
     QMainWindow::resizeEvent(event);
     updateWindowMask();
     if (geometryTimer_) geometryTimer_->start();
-    scheduleBackdropCapture();
 }
 void MainWindow::changeEvent(QEvent* event) {
     QMainWindow::changeEvent(event);
@@ -551,3 +540,5 @@ void MainWindow::changeEvent(QEvent* event) {
         for (const auto& tab : tabs_) if (tab.view) tab.view->update();
     }
 }
+
+
