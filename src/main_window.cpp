@@ -475,15 +475,15 @@ void MainWindow::captureBackdrop() {
         if (backdrop_) backdrop_->clearDesktopCapture();
         return;
     }
-    QScreen* screen = QGuiApplication::screenAt(frameGeometry().center());
+    const QPoint origin = mapToGlobal(QPoint(0, 0));
+    QScreen* screen = QGuiApplication::screenAt(origin + QPoint(width() / 2, height() / 2));
     if (!screen) return;
-    const QRect frame = frameGeometry();
-    const QRect geometry = screen->geometry();
+    const QRect screenGeometry = screen->geometry();
     setWindowOpacity(0.0);
     QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     QThread::msleep(40);
-    const QPixmap shot = screen->grabWindow(0, frame.x() - geometry.x(), frame.y() - geometry.y(),
-                                           frame.width(), frame.height());
+    const QPixmap shot = screen->grabWindow(0, origin.x() - screenGeometry.x(), origin.y() - screenGeometry.y(),
+                                           width(), height());
     setWindowOpacity(1.0);
     if (!shot.isNull()) backdrop_->setDesktopCapture(shot.toImage());
 }
