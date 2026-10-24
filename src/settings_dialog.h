@@ -29,7 +29,7 @@ private:
     bool loading_ = false;
     QLabel *preview_, *backgroundName_, *error_;
     QComboBox *font_, *shell_;
-    QCheckBox *copy_, *snap_;
+    QCheckBox *copy_, *snap_, *opaque_;
     QSpinBox* scrollback_;
     QButtonGroup* accents_;
     QSlider *opacity_, *dim_, *blur_, *tint_, *fontSize_;

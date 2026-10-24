@@ -89,6 +89,15 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
 
     section(body, "Appearance");
     opacity_ = addSlider(body, "opacitySlider", "Window opacity", 30, 100, 1, "%");
+    opaque_ = new QCheckBox("Keep the window background opaque"); opaque_->setObjectName("opaqueBackgroundCheck");
+    opaque_->setToolTip("Prevents text from other windows showing through the terminal. Turn off to use window opacity.");
+    body->addWidget(opaque_);
+    connect(opaque_, &QCheckBox::toggled, this, [this](bool enabled) {
+        if (loading_) return;
+        store_->settings.opaque_background = enabled;
+        opacity_->setEnabled(!enabled);
+        commit();
+    });
     dim_ = addSlider(body, "dimSlider", "Background dim", 0, 92, 1, "%");
     blur_ = addSlider(body, "blurSlider", "Background blur", 0, 40, 1, "px");
     tint_ = addSlider(body, "tintSlider", "Terminal tint", 0, 88, 1, "%");
@@ -166,7 +175,8 @@ QSlider* SettingsDialog::addSlider(QVBoxLayout* layout, const QString& name, con
 void SettingsDialog::loadControls() {
     loading_ = true;
     const auto& s = store_->settings;
-    opacity_->setValue(qRound(s.opacity * 100)); dim_->setValue(qRound(s.bg_dim * 100)); blur_->setValue(s.bg_blur); tint_->setValue(qRound(s.terminal_tint * 100));
+    opacity_->setValue(qRound(s.opacity * 100)); opacity_->setEnabled(!s.opaque_background); opaque_->setChecked(s.opaque_background);
+    dim_->setValue(qRound(s.bg_dim * 100)); blur_->setValue(s.bg_blur); tint_->setValue(qRound(s.terminal_tint * 100));
     font_->setCurrentText(s.font_family); fontSize_->setValue(qRound(s.font_size * 2)); copy_->setChecked(s.copy_on_select); snap_->setChecked(s.snap_windows);
     int shellIndex = shell_->findData(s.default_shell == "cmd" ? "native" : s.default_shell);
     shell_->setCurrentIndex(shellIndex < 0 && shell_->count() ? 0 : shellIndex); scrollback_->setValue(s.scrollback);
@@ -181,7 +191,7 @@ void SettingsDialog::commit() {
 }
 void SettingsDialog::updateStyle() {
     setStyleSheet(QString(
-        "#settingsPanel{background:rgba(11,17,27,252);border:1px solid #354153;border-radius:16px;}"
+        "#settingsPanel{background:#0b111b;border:1px solid #354153;border-radius:16px;}"
         "#settingsContent,QScrollArea{background:transparent;} QLabel,QCheckBox{color:#dce7f5;font:10pt 'Segoe UI';}"
         "#settingsTitle{font-size:20pt;font-weight:600;} #sectionLabel{color:%1;font-size:9pt;font-weight:700;margin-top:4px;}"
         "#mutedLabel,#shortcutHelp{color:#9aabc1;font-size:9pt;} #wallpaperPreview{background:#121e2e;border:1px solid #394659;border-radius:8px;}"

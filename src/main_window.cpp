@@ -139,7 +139,8 @@ void MainWindow::refreshTabs() {
 }
 void MainWindow::updateStatus() {
     const int index = currentIndex(); if (index < 0 || index >= tabs_.size() || !tabs_[index].view) return;
-    const auto& tab = tabs_[index]; status_->setInfo(tab.view->profile().label, tab.view->isRunning(), tab.columns, tab.rows, store_->settings.opacity);
+    const auto& tab = tabs_[index]; const double opacity = store_->settings.opaque_background ? 1.0 : store_->settings.opacity;
+    status_->setInfo(tab.view->profile().label, tab.view->isRunning(), tab.columns, tab.rows, opacity);
 }
 bool MainWindow::closeTab(int index) {
     if (closing_ || index < 0 || index >= tabs_.size()) return false;
@@ -301,7 +302,7 @@ void MainWindow::addFavoriteDialog() {
 }
 
 void MainWindow::applySettings() {
-    store_->sanitize(); setWindowOpacity(store_->settings.opacity);
+    store_->sanitize(); setWindowOpacity(store_->settings.opaque_background ? 1.0 : store_->settings.opacity);
     QPalette palette = qApp->palette();
     palette.setColor(QPalette::Window, QColor("#0b111b")); palette.setColor(QPalette::WindowText, QColor("#e6eefb"));
     palette.setColor(QPalette::Base, QColor("#101827")); palette.setColor(QPalette::AlternateBase, QColor("#182434"));
