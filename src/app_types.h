@@ -14,6 +14,7 @@ struct Settings {
     QString font_family = QStringLiteral("Vazir Code Hack");
     double font_size = 10.0;
     bool copy_on_select = true;
+    bool snap_windows = true;
     QString default_shell = QStringLiteral("native");
     QStringList pinned_commands;
     QVector<FavoriteCommand> favorite_commands;

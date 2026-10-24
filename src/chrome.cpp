@@ -184,6 +184,7 @@ void TopBar::setStayOnTop(bool enabled) {
 QPoint TopBar::quickAnchor() const { return quick_->mapToGlobal(QPoint(0, quick_->height())); }
 void TopBar::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton && event->position().y() < 42 && window()->windowHandle()) {
+        emit windowMoveStarted();
         window()->windowHandle()->startSystemMove(); event->accept(); return;
     }
     QWidget::mousePressEvent(event);

@@ -71,6 +71,7 @@ MainWindow::MainWindow(SettingsStore* store, QVector<ShellProfile> profiles, QWi
     connect(topbar_, &TopBar::quickMenuRequested, this, &MainWindow::showQuickMenu);
     connect(topbar_, &TopBar::settingsRequested, this, &MainWindow::openSettings);
     connect(topbar_, &TopBar::stayOnTopRequested, this, &MainWindow::toggleStayOnTop);
+    connect(topbar_, &TopBar::windowMoveStarted, this, &MainWindow::beginWindowMove);
     connect(topbar_, &TopBar::minimizeRequested, this, &QWidget::showMinimized);
     connect(topbar_, &TopBar::maximizeRequested, this, &MainWindow::toggleMaximized);
     connect(topbar_, &TopBar::closeRequested, this, &QWidget::close);
@@ -335,6 +336,47 @@ void MainWindow::toggleStayOnTop() {
 void MainWindow::toggleFullscreen() {
     if (isFullScreen()) { showNormal(); if (maximizedBeforeFullscreen_) showMaximized(); }
     else { maximizedBeforeFullscreen_ = isMaximized(); showFullScreen(); }
+}
+void MainWindow::beginWindowMove() {
+    snapArmed_ = true;
+    moveStartGeometry_ = geometry();
+}
+bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, qintptr* result) {
+    MSG* msg = static_cast<MSG*>(message);
+    if (msg->message == WM_EXITSIZEMOVE && snapArmed_) {
+        const bool moved = geometry().topLeft() != moveStartGeometry_.topLeft();
+        snapArmed_ = false;
+        if (moved) QTimer::singleShot(0, this, &MainWindow::applySnapFromCursor);
+    }
+    return QMainWindow::nativeEvent(eventType, message, result);
+}
+void MainWindow::applySnapFromCursor() {
+    if (!store_->settings.snap_windows || isFullScreen() || isMaximized()) return;
+    const QPoint cursor = QCursor::pos();
+    QScreen* screen = QGuiApplication::screenAt(cursor);
+    if (!screen) screen = QGuiApplication::primaryScreen();
+    if (!screen) return;
+    const QRect area = screen->availableGeometry();
+    const int edge = 12;
+    const bool left = cursor.x() <= area.left() + edge;
+    const bool right = cursor.x() >= area.left() + area.width() - edge;
+    const bool top = cursor.y() <= area.top() + edge;
+    const bool bottom = cursor.y() >= area.top() + area.height() - edge;
+    if (!left && !right && !top && !bottom) return;
+    const int halfWidth = area.width() / 2;
+    const int halfHeight = area.height() / 2;
+    if ((left || right) && (top || bottom)) {
+        const int x = left ? area.left() : area.left() + area.width() - halfWidth;
+        const int y = top ? area.top() : area.top() + area.height() - halfHeight;
+        showNormal();
+        setGeometry(x, y, halfWidth, halfHeight);
+    } else if (left || right) {
+        showNormal();
+        setGeometry(left ? area.left() : area.left() + area.width() - halfWidth,
+                    area.top(), halfWidth, area.height());
+    } else if (top) {
+        showMaximized();
+    }
 }
 
 void MainWindow::installShortcuts() {

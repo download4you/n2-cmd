@@ -109,6 +109,10 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
     copy_ = new QCheckBox("Copy automatically when I select text with the mouse"); copy_->setObjectName("copyOnSelectCheck");
     body->addWidget(copy_);
     connect(copy_, &QCheckBox::toggled, this, [this](bool enabled) { if (!loading_) { store_->settings.copy_on_select = enabled; commit(); } });
+    snap_ = new QCheckBox("Snap windows to screen edges"); snap_->setObjectName("snapWindowsCheck");
+    snap_->setToolTip("Drag the title bar to a screen edge or corner to tile the window; drag to the top to maximize.");
+    body->addWidget(snap_);
+    connect(snap_, &QCheckBox::toggled, this, [this](bool enabled) { if (!loading_) { store_->settings.snap_windows = enabled; commit(); } });
     auto* shellRow = new QHBoxLayout;
     auto* shellLabel = new QLabel("Default shell"); shellLabel->setFixedWidth(132); shellRow->addWidget(shellLabel);
     shell_ = new QComboBox; shell_->setObjectName("defaultShellCombo"); shell_->setAccessibleName("Default shell");
@@ -163,7 +167,7 @@ void SettingsDialog::loadControls() {
     loading_ = true;
     const auto& s = store_->settings;
     opacity_->setValue(qRound(s.opacity * 100)); dim_->setValue(qRound(s.bg_dim * 100)); blur_->setValue(s.bg_blur); tint_->setValue(qRound(s.terminal_tint * 100));
-    font_->setCurrentText(s.font_family); fontSize_->setValue(qRound(s.font_size * 2)); copy_->setChecked(s.copy_on_select);
+    font_->setCurrentText(s.font_family); fontSize_->setValue(qRound(s.font_size * 2)); copy_->setChecked(s.copy_on_select); snap_->setChecked(s.snap_windows);
     int shellIndex = shell_->findData(s.default_shell == "cmd" ? "native" : s.default_shell);
     shell_->setCurrentIndex(shellIndex < 0 && shell_->count() ? 0 : shellIndex); scrollback_->setValue(s.scrollback);
     for (auto* button : accents_->buttons()) button->setChecked(button->property("accent").toString() == s.accent);

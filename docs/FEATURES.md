@@ -19,6 +19,7 @@ and Lua supplies configuration. Python is not an application dependency.
 | Accent | Cyan, Violet, Mint, Amber and Rose; Mint default |
 | Scrollback | 500-50,000 retained lines; 6,000 default |
 | Scrollback navigation | Mouse wheel; click or drag the right-hand scrollbar |
+| Window snapping | Drag to a screen edge or corner; on by default, toggle in Settings |
 | TUI newline | Shift+Enter sends a native Shift+Enter key record |
 | Always on top | Pin button in the header |
 | Default shell | Any detected profile |

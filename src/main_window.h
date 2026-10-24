@@ -57,6 +57,7 @@ signals:
     void errorOccurred(const QString& message);
 protected:
     bool eventFilter(QObject*, QEvent*) override;
+    bool nativeEvent(const QByteArray&, void*, qintptr*) override;
     void closeEvent(QCloseEvent*) override;
     void resizeEvent(QResizeEvent*) override;
     void changeEvent(QEvent*) override;
@@ -77,6 +78,8 @@ private:
     void restoreGeometryFromSettings();
     void saveGeometryToSettings();
     void updateWindowMask();
+    void beginWindowMove();
+    void applySnapFromCursor();
     void showError(const QString& message);
     void recordError(const QString& message);
     void installShortcuts();
@@ -88,6 +91,8 @@ private:
     bool autoStart_, closing_ = false;
     bool maximizedBeforeFullscreen_ = false;
     bool stayOnTop_ = false;
+    bool snapArmed_ = false;
+    QRect moveStartGeometry_;
     Backdrop* backdrop_ = nullptr;
     TopBar* topbar_ = nullptr;
     TerminalStatusBar* status_ = nullptr;

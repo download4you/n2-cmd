@@ -180,6 +180,7 @@ to 2,000 Unicode characters. See [FEATURES.md](docs/FEATURES.md) for details.
 | Copy/paste | Ctrl+Shift+C / Ctrl+Shift+V |
 | New line in Codex and other TUI editors | Shift+Enter |
 | Scroll back | Mouse wheel; click or drag the right scrollbar |
+| Snap the window | Drag the title bar to a screen edge or corner; toggle in Settings |
 | Keep the window above other windows | Pin button in the header |
 | Zoom | Ctrl+mouse wheel |
 | Select text | Mouse drag |

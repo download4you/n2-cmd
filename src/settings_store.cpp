@@ -99,6 +99,7 @@ void overlaySettings(Settings& settings, const QJsonObject& values) {
     string("default_shell", settings.default_shell);
     string("accent", settings.accent);
     boolean("copy_on_select", settings.copy_on_select);
+    boolean("snap_windows", settings.snap_windows);
     boolean("maximized", settings.maximized);
     if (values.value(QStringLiteral("pinned_commands")).isArray()) {
         settings.pinned_commands.clear();
@@ -137,6 +138,7 @@ QJsonObject settingsObject(const Settings& settings) {
         {QStringLiteral("font_family"), settings.font_family},
         {QStringLiteral("font_size"), settings.font_size},
         {QStringLiteral("copy_on_select"), settings.copy_on_select},
+        {QStringLiteral("snap_windows"), settings.snap_windows},
         {QStringLiteral("default_shell"), settings.default_shell},
         {QStringLiteral("pinned_commands"), pins},
         {QStringLiteral("favorite_commands"), favorites},
@@ -169,7 +171,7 @@ QJsonObject luaSettingsObject(lua_State* state) {
     const int table = lua_absindex(state, -1);
     constexpr const char* fields[] = {
         "opacity", "background", "bg_dim", "bg_blur", "terminal_tint", "font_family",
-        "font_size", "copy_on_select", "default_shell", "accent", "scrollback",
+        "font_size", "copy_on_select", "snap_windows", "default_shell", "accent", "scrollback",
         "window_width", "window_height", "window_x", "window_y", "maximized",
     };
     for (const char* field : fields) {

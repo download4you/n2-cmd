@@ -71,12 +71,13 @@ void NativeUiTests::settingsControlsAndReset() {
     auto* shell = dialog.findChild<QComboBox*>("defaultShellCombo"); QCOMPARE(shell->currentData().toString(), QString("native"));
     shell->setCurrentIndex(shell->findData("enhanced")); QCOMPARE(store.settings.default_shell, QString("enhanced"));
     dialog.findChild<QCheckBox*>("copyOnSelectCheck")->setChecked(false); QVERIFY(!store.settings.copy_on_select);
+    dialog.findChild<QCheckBox*>("snapWindowsCheck")->setChecked(false); QVERIFY(!store.settings.snap_windows);
     dialog.findChild<QSpinBox*>("scrollbackSpin")->setValue(12500); QCOMPARE(store.settings.scrollback, 12500);
     for (const QString& accent : {QStringLiteral("accentCyan"), QStringLiteral("accentViolet"), QStringLiteral("accentMint"),
                                   QStringLiteral("accentAmber"), QStringLiteral("accentRose")})
         QVERIFY2(dialog.findChild<QPushButton*>(accent), qPrintable(accent));
     dialog.findChild<QPushButton*>("accentViolet")->click(); QCOMPARE(store.settings.accent, QString("#9b8cff"));
-    SettingsStore reloaded(directory.path()); QVERIFY(reloaded.load(&error)); QCOMPARE(reloaded.settings.opacity, .73); QCOMPARE(reloaded.settings.font_size, 15.5);
+    SettingsStore reloaded(directory.path()); QVERIFY(reloaded.load(&error)); QCOMPARE(reloaded.settings.opacity, .73); QCOMPARE(reloaded.settings.font_size, 15.5); QVERIFY(!reloaded.settings.snap_windows);
     QVERIFY(changed.count() >= 10);
     dialog.resetAppearance(); QCOMPARE(store.settings.opacity, .94); QCOMPARE(store.settings.font_family, QString("Vazir Code Hack"));
     QCOMPARE(store.settings.font_size, 10.0); QCOMPARE(store.settings.bg_blur, 8); QCOMPARE(store.settings.accent, QString("#3ddc97"));

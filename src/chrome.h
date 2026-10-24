@@ -40,6 +40,7 @@ signals:
     void quickMenuRequested(QPoint position);
     void settingsRequested();
     void stayOnTopRequested();
+    void windowMoveStarted();
     void minimizeRequested();
     void maximizeRequested();
     void closeRequested();
