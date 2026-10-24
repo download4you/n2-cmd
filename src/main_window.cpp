@@ -433,7 +433,10 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event) {
             if (event->type() == QEvent::MouseButtonPress && mouse->button() == Qt::LeftButton && windowHandle()) { windowHandle()->startSystemResize(edges); return true; }
         } else if (resizeCursorOwner_) { resizeCursorOwner_->setCursor(previousCursor_); resizeCursorOwner_.clear(); }
     }
-    if (event->type() == QEvent::Move && widget == this && geometryTimer_) geometryTimer_->start();
+    if (event->type() == QEvent::Move && widget == this) {
+        if (geometryTimer_) geometryTimer_->start();
+        if (backdrop_ && !store_->settings.opaque_background) backdrop_->update();
+    }
     return QMainWindow::eventFilter(object, event);
 }
 
@@ -475,20 +478,20 @@ void MainWindow::captureBackdrop() {
         if (backdrop_) backdrop_->clearDesktopCapture();
         return;
     }
-    const QPoint origin = mapToGlobal(QPoint(0, 0));
-    QScreen* screen = QGuiApplication::screenAt(origin + QPoint(width() / 2, height() / 2));
+    const QPoint center = mapToGlobal(QPoint(width() / 2, height() / 2));
+    QScreen* screen = QGuiApplication::screenAt(center);
     if (!screen) return;
     const QRect screenGeometry = screen->geometry();
-    const qreal scale = screen->devicePixelRatio();
     setWindowOpacity(0.0);
     QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     QThread::msleep(40);
-    const int x = qRound((origin.x() - screenGeometry.x()) * scale);
-    const int y = qRound((origin.y() - screenGeometry.y()) * scale);
-    QPixmap shot = screen->grabWindow(0, x, y, qRound(width() * scale), qRound(height() * scale));
-    if (!shot.isNull()) shot.setDevicePixelRatio(scale);
+    QPixmap shot = screen->grabWindow(0, 0, 0, screenGeometry.width(), screenGeometry.height());
     setWindowOpacity(1.0);
-    if (!shot.isNull()) backdrop_->setDesktopCapture(shot.toImage());
+    if (!shot.isNull()) {
+        QImage image = shot.toImage();
+        image.setDevicePixelRatio(screen->devicePixelRatio());
+        backdrop_->setDesktopCapture(image, screenGeometry.topLeft());
+    }
 }
 void MainWindow::showEvent(QShowEvent* event) {
     QMainWindow::showEvent(event);

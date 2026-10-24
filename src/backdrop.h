@@ -9,7 +9,7 @@ class Backdrop : public QWidget {
 public:
     explicit Backdrop(SettingsStore* store, QWidget* parent = nullptr);
     void applySettings();
-    void setDesktopCapture(const QImage& image);
+    void setDesktopCapture(const QImage& image, const QPoint& origin);
     void clearDesktopCapture();
     QImage sourceImage() const;
     static bool importWallpaper(const QString& source, const QString& destination, QString* error = nullptr);
@@ -23,6 +23,7 @@ private:
     QString loadedPath_;
     QString loadedStamp_;
     QImage source_, blurred_, desktop_, desktopBlurred_;
+    QPoint desktopOrigin_;
     int appliedBlur_ = -1;
     QTimer debounce_;
 };

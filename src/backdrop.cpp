@@ -104,8 +104,9 @@ void Backdrop::rebuild() {
     emit imageChanged();
 }
 
-void Backdrop::setDesktopCapture(const QImage& image) {
+void Backdrop::setDesktopCapture(const QImage& image, const QPoint& origin) {
     desktop_ = image;
+    desktopOrigin_ = origin;
     desktopBlurred_ = image;
     if (!image.isNull()) {
         QGraphicsScene scene;
@@ -119,6 +120,7 @@ void Backdrop::setDesktopCapture(const QImage& image) {
         desktopBlurred_.fill(Qt::black);
         QPainter painter(&desktopBlurred_);
         scene.render(&painter, QRectF(QPointF(0, 0), desktopBlurred_.size()), scene.sceneRect());
+        desktopBlurred_.setDevicePixelRatio(image.devicePixelRatio());
     }
     update();
 }
@@ -153,11 +155,12 @@ void Backdrop::paintEvent(QPaintEvent*) {
     } else {
         painter.fillRect(rect(), QColor(7, 12, 20));
         if (!desktopBlurred_.isNull()) {
-            QSizeF size = desktopBlurred_.size();
-            size.scale(this->size(), Qt::KeepAspectRatioByExpanding);
+            const qreal scale = desktopBlurred_.devicePixelRatio();
+            const QPoint delta = mapToGlobal(QPoint(0, 0)) - desktopOrigin_;
+            const QRectF source(delta.x() * scale, delta.y() * scale, width() * scale, height() * scale);
             const double opacity = 1.0 - (1.0 - store_->settings.opacity) * (1.0 - store_->settings.background_blur_opacity);
             painter.setOpacity(std::clamp(opacity, 0.0, 1.0));
-            painter.drawImage(QRectF((width() - size.width()) / 2, (height() - size.height()) / 2, size.width(), size.height()), desktopBlurred_);
+            painter.drawImage(QRectF(rect()), desktopBlurred_, source);
             painter.setOpacity(1.0);
         }
     }
