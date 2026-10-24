@@ -126,7 +126,7 @@ void Backdrop::paintEvent(QPaintEvent*) {
         painter.fillRect(rect(), QColor(3, 6, 12, qRound(255 * store_->settings.bg_dim)));
     } else {
         QColor veil(8, 13, 22);
-        veil.setAlpha(qRound(255 * store_->settings.background_blur_opacity));
+        veil.setAlpha(qRound(255 * store_->settings.background_blur_opacity * store_->settings.opacity));
         painter.fillRect(rect(), veil);
     }
     painter.setClipping(false);
