@@ -1,4 +1,4 @@
-# n2-cmd 1.0.0
+﻿# n2-cmd 1.0.0
 
 n2-cmd is a Windows terminal for Persian and mixed-direction text. It is built
 with C, C++ and Lua: Qt 6 Widgets for the interface, Win32 ConPTY for shells,
@@ -20,7 +20,7 @@ is not required at runtime.
 - Scrollback can be navigated by clicking or dragging the right-hand scrollbar.
 - Dragging the window to a screen edge or corner snaps it like Windows 10/11; this can be disabled in Settings.
 - The terminal background is opaque by default so text from other windows does not show through.
-- Disabling opaque mode enables an acrylic blurred background with a separate opacity slider and the window opacity control.
+- Disabling opaque mode enables an blurred background with a separate opacity slider and the window opacity control.
 - A header pin button keeps the window above other windows.
 - Tabs with shell selection, duplicate, rename/reset, restart, close-other-tabs and output export.
 - 28 built-in quick commands with shell-specific mappings, pins and custom favorites.
@@ -56,3 +56,4 @@ The n2-cmd source is MIT licensed. Dependency licenses and upstream sources are
 recorded in `THIRD_PARTY.md`. Qt remains dynamically linked and replaceable;
 its LGPL/GPL license texts and third-party notices are included in release
 archives.
+

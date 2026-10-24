@@ -11,6 +11,7 @@
 #include <QSaveFile>
 #include <QDir>
 #include <QDateTime>
+#include <algorithm>
 
 Backdrop::Backdrop(SettingsStore* store, QWidget* parent) : QWidget(parent), store_(store) {
     setObjectName(QStringLiteral("terminalBackdrop"));
@@ -103,6 +104,31 @@ void Backdrop::rebuild() {
     emit imageChanged();
 }
 
+void Backdrop::setDesktopCapture(const QImage& image) {
+    desktop_ = image;
+    desktopBlurred_ = image;
+    if (!image.isNull()) {
+        QGraphicsScene scene;
+        auto* item = scene.addPixmap(QPixmap::fromImage(image));
+        auto* effect = new QGraphicsBlurEffect;
+        effect->setBlurRadius(30);
+        effect->setBlurHints(QGraphicsBlurEffect::QualityHint);
+        item->setGraphicsEffect(effect);
+        scene.setSceneRect(QRectF(QPointF(0, 0), image.size()));
+        desktopBlurred_ = QImage(image.size(), QImage::Format_ARGB32_Premultiplied);
+        desktopBlurred_.fill(Qt::black);
+        QPainter painter(&desktopBlurred_);
+        scene.render(&painter, QRectF(QPointF(0, 0), desktopBlurred_.size()), scene.sceneRect());
+    }
+    update();
+}
+
+void Backdrop::clearDesktopCapture() {
+    desktop_ = {};
+    desktopBlurred_ = {};
+    update();
+}
+
 QImage Backdrop::sourceImage() const { return source_; }
 
 void Backdrop::paintEvent(QPaintEvent*) {
@@ -125,9 +151,14 @@ void Backdrop::paintEvent(QPaintEvent*) {
         }
         painter.fillRect(rect(), QColor(3, 6, 12, qRound(255 * store_->settings.bg_dim)));
     } else {
-        QColor veil(8, 13, 22);
-        veil.setAlpha(qRound(255 * store_->settings.background_blur_opacity * store_->settings.opacity));
-        painter.fillRect(rect(), veil);
+        painter.fillRect(rect(), QColor(7, 12, 20));
+        if (!desktopBlurred_.isNull()) {
+            QSizeF size = desktopBlurred_.size();
+            size.scale(this->size(), Qt::KeepAspectRatioByExpanding);
+            painter.setOpacity(std::clamp(store_->settings.background_blur_opacity * store_->settings.opacity, 0.0, 1.0));
+            painter.drawImage(QRectF((width() - size.width()) / 2, (height() - size.height()) / 2, size.width(), size.height()), desktopBlurred_);
+            painter.setOpacity(1.0);
+        }
     }
     painter.setClipping(false);
     painter.setPen(QColor(255, 255, 255, 34));
