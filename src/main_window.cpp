@@ -479,11 +479,14 @@ void MainWindow::captureBackdrop() {
     QScreen* screen = QGuiApplication::screenAt(origin + QPoint(width() / 2, height() / 2));
     if (!screen) return;
     const QRect screenGeometry = screen->geometry();
+    const qreal scale = screen->devicePixelRatio();
     setWindowOpacity(0.0);
     QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     QThread::msleep(40);
-    const QPixmap shot = screen->grabWindow(0, origin.x() - screenGeometry.x(), origin.y() - screenGeometry.y(),
-                                           width(), height());
+    const int x = qRound((origin.x() - screenGeometry.x()) * scale);
+    const int y = qRound((origin.y() - screenGeometry.y()) * scale);
+    QPixmap shot = screen->grabWindow(0, x, y, qRound(width() * scale), qRound(height() * scale));
+    if (!shot.isNull()) shot.setDevicePixelRatio(scale);
     setWindowOpacity(1.0);
     if (!shot.isNull()) backdrop_->setDesktopCapture(shot.toImage());
 }
