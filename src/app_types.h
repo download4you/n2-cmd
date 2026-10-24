@@ -16,6 +16,7 @@ struct Settings {
     bool copy_on_select = true;
     bool snap_windows = true;
     bool opaque_background = true;
+    double background_blur_opacity = 0.45;
     QString default_shell = QStringLiteral("native");
     QStringList pinned_commands;
     QVector<FavoriteCommand> favorite_commands;

@@ -303,6 +303,7 @@ void MainWindow::addFavoriteDialog() {
 
 void MainWindow::applySettings() {
     store_->sanitize(); setWindowOpacity(store_->settings.opaque_background ? 1.0 : store_->settings.opacity);
+    updateBackdropEffect();
     QPalette palette = qApp->palette();
     palette.setColor(QPalette::Window, QColor("#0b111b")); palette.setColor(QPalette::WindowText, QColor("#e6eefb"));
     palette.setColor(QPalette::Base, QColor("#101827")); palette.setColor(QPalette::AlternateBase, QColor("#182434"));
@@ -432,6 +433,32 @@ void MainWindow::updateWindowMask() {
     // The rounded corners are painted by Backdrop. A native mask clips the
     // right and bottom edges under fractional display scaling.
     clearMask();
+}
+void MainWindow::updateBackdropEffect() {
+    HWND hwnd = reinterpret_cast<HWND>(winId());
+    enum { WCA_ACCENT_POLICY = 19 };
+    struct AccentPolicy { int state; int flags; int gradient; int animation; };
+    struct CompositionData { int attribute; void* data; SIZE_T size; };
+    using SetComposition = BOOL(WINAPI*)(HWND, CompositionData*);
+    static SetComposition setter = reinterpret_cast<SetComposition>(
+        GetProcAddress(GetModuleHandleW(L"user32.dll"), "SetWindowCompositionAttribute"));
+    if (!setter) return;
+    AccentPolicy policy{};
+    const bool blurred = !store_->settings.opaque_background;
+    if (blurred) {
+        policy.state = 4; // ACCENT_ENABLE_ACRYLICBLURBEHIND
+        policy.flags = 2;
+        policy.gradient = 0x551b110b;
+    }
+    CompositionData data{WCA_ACCENT_POLICY, &policy, sizeof(policy)};
+    if (!setter(hwnd, &data) && blurred) {
+        policy.state = 3; // ACCENT_ENABLE_BLURBEHIND
+        setter(hwnd, &data);
+    }
+}
+void MainWindow::showEvent(QShowEvent* event) {
+    QMainWindow::showEvent(event);
+    updateBackdropEffect();
 }
 
 void MainWindow::restoreGeometryFromSettings() {

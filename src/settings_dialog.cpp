@@ -96,8 +96,12 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
         if (loading_) return;
         store_->settings.opaque_background = enabled;
         opacity_->setEnabled(!enabled);
+        blurOpacity_->setEnabled(!enabled);
         commit();
     });
+    blurOpacity_ = addSlider(body, "blurOpacitySlider", "Background blur opacity", 0, 100, 1, "%");
+    blurOpacity_->setToolTip("Controls how much of the blurred background is visible through the window.");
+    connect(blurOpacity_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.background_blur_opacity = value / 100.0; commit(); } });
     dim_ = addSlider(body, "dimSlider", "Background dim", 0, 92, 1, "%");
     blur_ = addSlider(body, "blurSlider", "Background blur", 0, 40, 1, "px");
     tint_ = addSlider(body, "tintSlider", "Terminal tint", 0, 88, 1, "%");
@@ -176,6 +180,7 @@ void SettingsDialog::loadControls() {
     loading_ = true;
     const auto& s = store_->settings;
     opacity_->setValue(qRound(s.opacity * 100)); opacity_->setEnabled(!s.opaque_background); opaque_->setChecked(s.opaque_background);
+    blurOpacity_->setValue(qRound(s.background_blur_opacity * 100)); blurOpacity_->setEnabled(!s.opaque_background);
     dim_->setValue(qRound(s.bg_dim * 100)); blur_->setValue(s.bg_blur); tint_->setValue(qRound(s.terminal_tint * 100));
     font_->setCurrentText(s.font_family); fontSize_->setValue(qRound(s.font_size * 2)); copy_->setChecked(s.copy_on_select); snap_->setChecked(s.snap_windows);
     int shellIndex = shell_->findData(s.default_shell == "cmd" ? "native" : s.default_shell);

@@ -19,7 +19,8 @@ is not required at runtime.
 - Shift+Enter inserts a new line in Codex and other TUI editors.
 - Scrollback can be navigated by clicking or dragging the right-hand scrollbar.
 - Dragging the window to a screen edge or corner snaps it like Windows 10/11; this can be disabled in Settings.
-- The terminal background is opaque by default so text from other windows does not show through; window opacity remains available in Settings.
+- The terminal background is opaque by default so text from other windows does not show through.
+- Disabling opaque mode enables an acrylic blurred background with a separate opacity slider and the window opacity control.
 - A header pin button keeps the window above other windows.
 - Tabs with shell selection, duplicate, rename/reset, restart, close-other-tabs and output export.
 - 28 built-in quick commands with shell-specific mappings, pins and custom favorites.

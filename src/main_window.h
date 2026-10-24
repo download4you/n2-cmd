@@ -59,6 +59,7 @@ protected:
     bool eventFilter(QObject*, QEvent*) override;
     bool nativeEvent(const QByteArray&, void*, qintptr*) override;
     void closeEvent(QCloseEvent*) override;
+    void showEvent(QShowEvent*) override;
     void resizeEvent(QResizeEvent*) override;
     void changeEvent(QEvent*) override;
 private:
@@ -78,6 +79,7 @@ private:
     void restoreGeometryFromSettings();
     void saveGeometryToSettings();
     void updateWindowMask();
+    void updateBackdropEffect();
     void beginWindowMove();
     void applySnapFromCursor();
     void showError(const QString& message);

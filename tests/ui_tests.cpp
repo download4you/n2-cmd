@@ -73,12 +73,13 @@ void NativeUiTests::settingsControlsAndReset() {
     dialog.findChild<QCheckBox*>("copyOnSelectCheck")->setChecked(false); QVERIFY(!store.settings.copy_on_select);
     dialog.findChild<QCheckBox*>("snapWindowsCheck")->setChecked(false); QVERIFY(!store.settings.snap_windows);
     dialog.findChild<QCheckBox*>("opaqueBackgroundCheck")->setChecked(false); QVERIFY(!store.settings.opaque_background);
+    dialog.findChild<QSlider*>("blurOpacitySlider")->setValue(70); QCOMPARE(store.settings.background_blur_opacity, .7);
     dialog.findChild<QSpinBox*>("scrollbackSpin")->setValue(12500); QCOMPARE(store.settings.scrollback, 12500);
     for (const QString& accent : {QStringLiteral("accentCyan"), QStringLiteral("accentViolet"), QStringLiteral("accentMint"),
                                   QStringLiteral("accentAmber"), QStringLiteral("accentRose")})
         QVERIFY2(dialog.findChild<QPushButton*>(accent), qPrintable(accent));
     dialog.findChild<QPushButton*>("accentViolet")->click(); QCOMPARE(store.settings.accent, QString("#9b8cff"));
-    SettingsStore reloaded(directory.path()); QVERIFY(reloaded.load(&error)); QCOMPARE(reloaded.settings.opacity, .73); QCOMPARE(reloaded.settings.font_size, 15.5); QVERIFY(!reloaded.settings.snap_windows); QVERIFY(!reloaded.settings.opaque_background);
+    SettingsStore reloaded(directory.path()); QVERIFY(reloaded.load(&error)); QCOMPARE(reloaded.settings.opacity, .73); QCOMPARE(reloaded.settings.font_size, 15.5); QVERIFY(!reloaded.settings.snap_windows); QVERIFY(!reloaded.settings.opaque_background); QCOMPARE(reloaded.settings.background_blur_opacity, .7);
     QVERIFY(changed.count() >= 10);
     dialog.resetAppearance(); QCOMPARE(store.settings.opacity, .94); QCOMPARE(store.settings.font_family, QString("Vazir Code Hack"));
     QCOMPARE(store.settings.font_size, 10.0); QCOMPARE(store.settings.bg_blur, 8); QCOMPARE(store.settings.accent, QString("#3ddc97"));

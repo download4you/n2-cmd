@@ -20,7 +20,8 @@ and Lua supplies configuration. Python is not an application dependency.
 | Scrollback | 500-50,000 retained lines; 6,000 default |
 | Scrollback navigation | Mouse wheel; click or drag the right-hand scrollbar |
 | Window snapping | Drag to a screen edge or corner; on by default, toggle in Settings |
-| Opaque background | On by default; hides text from other windows. Disable to use window opacity |
+| Opaque background | On by default; hides text from other windows. Disable for an acrylic blurred background |
+| Background blur opacity | 0-100%; controls the acrylic background when opaque mode is off |
 | TUI newline | Shift+Enter sends a native Shift+Enter key record |
 | Always on top | Pin button in the header |
 | Default shell | Any detected profile |

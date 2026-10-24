@@ -87,6 +87,7 @@ void overlaySettings(Settings& settings, const QJsonObject& values) {
     number("opacity", settings.opacity);
     number("bg_dim", settings.bg_dim);
     number("terminal_tint", settings.terminal_tint);
+    number("background_blur_opacity", settings.background_blur_opacity);
     number("font_size", settings.font_size);
     integer("bg_blur", settings.bg_blur);
     integer("scrollback", settings.scrollback);
@@ -141,6 +142,7 @@ QJsonObject settingsObject(const Settings& settings) {
         {QStringLiteral("copy_on_select"), settings.copy_on_select},
         {QStringLiteral("snap_windows"), settings.snap_windows},
         {QStringLiteral("opaque_background"), settings.opaque_background},
+        {QStringLiteral("background_blur_opacity"), settings.background_blur_opacity},
         {QStringLiteral("default_shell"), settings.default_shell},
         {QStringLiteral("pinned_commands"), pins},
         {QStringLiteral("favorite_commands"), favorites},
@@ -173,7 +175,8 @@ QJsonObject luaSettingsObject(lua_State* state) {
     const int table = lua_absindex(state, -1);
     constexpr const char* fields[] = {
         "opacity", "background", "bg_dim", "bg_blur", "terminal_tint", "font_family",
-        "font_size", "copy_on_select", "snap_windows", "opaque_background", "default_shell", "accent", "scrollback",
+        "font_size", "copy_on_select", "snap_windows", "opaque_background", "background_blur_opacity",
+        "default_shell", "accent", "scrollback",
         "window_width", "window_height", "window_x", "window_y", "maximized",
     };
     for (const char* field : fields) {
@@ -437,6 +440,7 @@ void SettingsStore::sanitize() {
     settings.bg_dim = bounded(settings.bg_dim, 0.0, 0.92, defaults.bg_dim);
     settings.bg_blur = std::clamp(settings.bg_blur, 0, 40);
     settings.terminal_tint = bounded(settings.terminal_tint, 0.0, 0.88, defaults.terminal_tint);
+    settings.background_blur_opacity = bounded(settings.background_blur_opacity, 0.0, 1.0, defaults.background_blur_opacity);
     settings.font_size = bounded(settings.font_size, 7.5, 26.0, defaults.font_size);
     settings.scrollback = std::clamp(settings.scrollback, 500, 50000);
     settings.window_width = std::clamp(settings.window_width, 640, 10000);
@@ -501,6 +505,7 @@ void SettingsStore::resetAppearance() {
     const Settings defaults;
     settings.opacity = defaults.opacity;
     settings.opaque_background = defaults.opaque_background;
+    settings.background_blur_opacity = defaults.background_blur_opacity;
     settings.background = defaults.background;
     settings.bg_dim = defaults.bg_dim;
     settings.bg_blur = defaults.bg_blur;

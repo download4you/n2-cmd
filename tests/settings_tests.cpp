@@ -126,6 +126,7 @@ void verifyPersistenceAndMutations() {
     store.settings.copy_on_select = false;
     store.settings.snap_windows = false;
     store.settings.opaque_background = false;
+    store.settings.background_blur_opacity = 0.25;
     CHECK(store.setPinned(QStringLiteral("git-status"), true, &error));
     CHECK(store.setPinned(QStringLiteral("git-status"), true, &error));
     CHECK(store.settings.pinned_commands.size() == 1);
@@ -142,6 +143,7 @@ void verifyPersistenceAndMutations() {
     CHECK(!restored.settings.copy_on_select);
     CHECK(!restored.settings.snap_windows);
     CHECK(!restored.settings.opaque_background);
+    CHECK(restored.settings.background_blur_opacity == 0.25);
     CHECK(restored.settings.favorite_commands.size() == 1);
     CHECK(restored.settings.favorite_commands.first().name == persian);
     CHECK(restored.settings.favorite_commands.first().command == QStringLiteral("echo ") + persian);

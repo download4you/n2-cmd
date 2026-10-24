@@ -112,17 +112,23 @@ void Backdrop::paintEvent(QPaintEvent*) {
     const bool square = window()->isMaximized() || window()->isFullScreen();
     outline.addRoundedRect(QRectF(rect()).adjusted(.5, .5, -.5, -.5), square ? 0 : 13, square ? 0 : 13);
     painter.setClipPath(outline);
-    QLinearGradient gradient(0, 0, width(), height());
-    gradient.setColorAt(0, QColor("#0b2230"));
-    gradient.setColorAt(.55, QColor("#0a101d"));
-    gradient.setColorAt(1, QColor("#1a1030"));
-    painter.fillRect(rect(), gradient);
-    if (!blurred_.isNull()) {
-        QSizeF size = blurred_.size();
-        size.scale(this->size(), Qt::KeepAspectRatioByExpanding);
-        painter.drawImage(QRectF((width() - size.width()) / 2, (height() - size.height()) / 2, size.width(), size.height()), blurred_);
+    if (store_->settings.opaque_background) {
+        QLinearGradient gradient(0, 0, width(), height());
+        gradient.setColorAt(0, QColor("#0b2230"));
+        gradient.setColorAt(.55, QColor("#0a101d"));
+        gradient.setColorAt(1, QColor("#1a1030"));
+        painter.fillRect(rect(), gradient);
+        if (!blurred_.isNull()) {
+            QSizeF size = blurred_.size();
+            size.scale(this->size(), Qt::KeepAspectRatioByExpanding);
+            painter.drawImage(QRectF((width() - size.width()) / 2, (height() - size.height()) / 2, size.width(), size.height()), blurred_);
+        }
+        painter.fillRect(rect(), QColor(3, 6, 12, qRound(255 * store_->settings.bg_dim)));
+    } else {
+        QColor veil(8, 13, 22);
+        veil.setAlpha(qRound(255 * store_->settings.background_blur_opacity));
+        painter.fillRect(rect(), veil);
     }
-    painter.fillRect(rect(), QColor(3, 6, 12, qRound(255 * store_->settings.bg_dim)));
     painter.setClipping(false);
     painter.setPen(QColor(255, 255, 255, 34));
     painter.setBrush(Qt::NoBrush);

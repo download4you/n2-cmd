@@ -32,5 +32,5 @@ private:
     QCheckBox *copy_, *snap_, *opaque_;
     QSpinBox* scrollback_;
     QButtonGroup* accents_;
-    QSlider *opacity_, *dim_, *blur_, *tint_, *fontSize_;
+    QSlider *opacity_, *blurOpacity_, *dim_, *blur_, *tint_, *fontSize_;
 };
