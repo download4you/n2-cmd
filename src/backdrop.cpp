@@ -155,7 +155,8 @@ void Backdrop::paintEvent(QPaintEvent*) {
         if (!desktopBlurred_.isNull()) {
             QSizeF size = desktopBlurred_.size();
             size.scale(this->size(), Qt::KeepAspectRatioByExpanding);
-            painter.setOpacity(std::clamp(store_->settings.background_blur_opacity * store_->settings.opacity, 0.0, 1.0));
+            const double opacity = 1.0 - (1.0 - store_->settings.opacity) * (1.0 - store_->settings.background_blur_opacity);
+            painter.setOpacity(std::clamp(opacity, 0.0, 1.0));
             painter.drawImage(QRectF((width() - size.width()) / 2, (height() - size.height()) / 2, size.width(), size.height()), desktopBlurred_);
             painter.setOpacity(1.0);
         }
