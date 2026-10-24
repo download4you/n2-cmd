@@ -478,20 +478,34 @@ void MainWindow::captureBackdrop() {
         if (backdrop_) backdrop_->clearDesktopCapture();
         return;
     }
-    const QPoint center = mapToGlobal(QPoint(width() / 2, height() / 2));
-    QScreen* screen = QGuiApplication::screenAt(center);
-    if (!screen) return;
-    const QRect screenGeometry = screen->geometry();
+    const int left = GetSystemMetrics(SM_XVIRTUALSCREEN);
+    const int top = GetSystemMetrics(SM_YVIRTUALSCREEN);
+    const int width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    const int height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    if (width <= 0 || height <= 0) return;
     setWindowOpacity(0.0);
     QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     QThread::msleep(40);
-    QPixmap shot = screen->grabWindow(0, 0, 0, screenGeometry.width(), screenGeometry.height());
+    HDC screen = GetDC(nullptr);
+    HDC memory = CreateCompatibleDC(screen);
+    HBITMAP bitmap = CreateCompatibleBitmap(screen, width, height);
+    HGDIOBJ previous = SelectObject(memory, bitmap);
+    BitBlt(memory, 0, 0, width, height, screen, left, top, SRCCOPY);
+    BITMAPINFO info{};
+    info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    info.bmiHeader.biWidth = width;
+    info.bmiHeader.biHeight = -height;
+    info.bmiHeader.biPlanes = 1;
+    info.bmiHeader.biBitCount = 32;
+    info.bmiHeader.biCompression = BI_RGB;
+    QImage image(width, height, QImage::Format_RGB32);
+    GetDIBits(memory, bitmap, 0, height, image.bits(), &info, DIB_RGB_COLORS);
+    SelectObject(memory, previous);
+    DeleteObject(bitmap);
+    DeleteDC(memory);
+    ReleaseDC(nullptr, screen);
     setWindowOpacity(1.0);
-    if (!shot.isNull()) {
-        QImage image = shot.toImage();
-        image.setDevicePixelRatio(screen->devicePixelRatio());
-        backdrop_->setDesktopCapture(image, screenGeometry.topLeft());
-    }
+    if (!image.isNull()) backdrop_->setDesktopCapture(image, QPoint(left, top));
 }
 void MainWindow::showEvent(QShowEvent* event) {
     QMainWindow::showEvent(event);

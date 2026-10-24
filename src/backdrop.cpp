@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <algorithm>
+#include <windows.h>
 
 Backdrop::Backdrop(SettingsStore* store, QWidget* parent) : QWidget(parent), store_(store) {
     setObjectName(QStringLiteral("terminalBackdrop"));
@@ -155,9 +156,13 @@ void Backdrop::paintEvent(QPaintEvent*) {
     } else {
         painter.fillRect(rect(), QColor(7, 12, 20));
         if (!desktopBlurred_.isNull()) {
-            const qreal scale = desktopBlurred_.devicePixelRatio();
-            const QPoint delta = mapToGlobal(QPoint(0, 0)) - desktopOrigin_;
-            const QRectF source(delta.x() * scale, delta.y() * scale, width() * scale, height() * scale);
+            HWND hwnd = reinterpret_cast<HWND>(window()->winId());
+            POINT origin{0, 0};
+            ClientToScreen(hwnd, &origin);
+            RECT client{};
+            GetClientRect(hwnd, &client);
+            const QRectF source(origin.x - desktopOrigin_.x(), origin.y - desktopOrigin_.y(),
+                                client.right, client.bottom);
             const double opacity = 1.0 - (1.0 - store_->settings.opacity) * (1.0 - store_->settings.background_blur_opacity);
             painter.setOpacity(std::clamp(opacity, 0.0, 1.0));
             painter.drawImage(QRectF(rect()), desktopBlurred_, source);
