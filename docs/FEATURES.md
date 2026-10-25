@@ -20,8 +20,9 @@ and Lua supplies configuration. Python is not an application dependency.
 | Scrollback | 500-50,000 retained lines; 6,000 default |
 | Scrollback navigation | Mouse wheel; click or drag the right-hand scrollbar |
 | Window snapping | Drag to a screen edge or corner; on by default, toggle in Settings |
-| Opaque background | On by default; hides text from other windows. Disable for an blurred background |
+| Opaque background | On by default; hides text from other windows. Disable for a blurred background |
 | Background blur opacity | 0-100%; controls the blurred background when opaque mode is off |
+| Live blurred background | Refreshes about every 700 ms; the blur stays aligned with the desktop behind the window and updates when the desktop changes |
 | TUI newline | Shift+Enter sends a native Shift+Enter key record |
 | Always on top | Pin button in the header |
 | Default shell | Any detected profile |
@@ -29,6 +30,17 @@ and Lua supplies configuration. Python is not an application dependency.
 | Reset appearance | Restores visual defaults while preserving shell, selection behavior, favorites, pins and geometry |
 
 The minimum window size is 640 x 400. The default size is 1240 x 780.
+
+## Blurred background
+
+With opaque mode off, the window shows a blurred copy of the desktop behind it.
+The copy is captured on a worker thread at a quarter of the screen resolution,
+blurred with a separable box blur, and cropped in physical screen pixels so the
+result stays aligned with the desktop while the window is moved or resized.
+Captures refresh roughly every 700 ms, so content behind the terminal updates
+live. The terminal window is excluded from its own capture, which keeps the
+refresh free of flicker.
+
 
 ## Shell profiles
 

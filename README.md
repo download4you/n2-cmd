@@ -181,7 +181,7 @@ to 2,000 Unicode characters. See [FEATURES.md](docs/FEATURES.md) for details.
 | New line in Codex and other TUI editors | Shift+Enter |
 | Scroll back | Mouse wheel; click or drag the right scrollbar |
 | Snap the window | Drag the title bar to a screen edge or corner; toggle in Settings |
-| Keep the background opaque | On by default; disable in Settings for an blurred background |
+| Keep the background opaque | On by default; disable in Settings for a blurred background |
 | Background blur opacity | Adjusts the blurred background when opaque mode is off |
 | Keep the window above other windows | Pin button in the header |
 | Zoom | Ctrl+mouse wheel |
