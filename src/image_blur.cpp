@@ -1,4 +1,5 @@
 #include "image_blur.h"
+#include <QColor>
 #include <algorithm>
 #include <vector>
 

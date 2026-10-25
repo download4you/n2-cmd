@@ -84,7 +84,6 @@ MainWindow::MainWindow(SettingsStore* store, QVector<ShellProfile> profiles, QWi
     qApp->installEventFilter(this);
     restoreGeometryFromSettings(); applySettings();
     newTab(store_->settings.default_shell);
-    backdrop_->setWindow(reinterpret_cast<quintptr>(winId()));
     backdrop_->setRefreshInterval(700);
 }
 
@@ -468,7 +467,7 @@ void MainWindow::updateBackdropEffect() {
 void MainWindow::showEvent(QShowEvent* event) {
     QMainWindow::showEvent(event);
     updateBackdropEffect();
-    backdrop_->setWindow(reinterpret_cast<quintptr>(winId()));
+    backdrop_->setWindow(static_cast<quintptr>(winId()));
     backdrop_->refresh();
 }
 

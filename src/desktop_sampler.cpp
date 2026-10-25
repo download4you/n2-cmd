@@ -1,7 +1,6 @@
 #include "desktop_sampler.h"
 #include "image_blur.h"
 #include <QImage>
-#include <QMetaObject>
 #include <windows.h>
 
 namespace {
@@ -145,12 +144,7 @@ void DesktopSampler::capture() {
     const double ratio = grabbed.pixelsPerPixel > 0.0 ? grabbed.pixelsPerPixel : 1.0;
     const int radius = radius_.load(std::memory_order_relaxed);
     const int sampleRadius = qMax(1, qRound(radius / ratio));
-    const QImage image = blurImage(grabbed.image, sampleRadius);
-
-    // The capture happens on the worker thread, so the result is handed to the
-    // thread that owns this object before the signal is emitted.
-    QMetaObject::invokeMethod(
-        this,
-        [this, image, origin = grabbed.origin, ratio] { emit sampled(image, origin, ratio); },
-        Qt::QueuedConnection);
+    // Emitted from the worker thread; the receiver lives in the interface
+    // thread, so the connection delivers the sample there.
+    emit sampled(blurImage(grabbed.image, sampleRadius), grabbed.origin, ratio);
 }

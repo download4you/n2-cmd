@@ -1,4 +1,4 @@
-#include "settings_dialog.h"
+﻿#include "settings_dialog.h"
 #include "backdrop.h"
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -20,6 +20,8 @@
 #include <QVBoxLayout>
 
 namespace {
+// All labels in the form share one column so the controls line up.
+constexpr int kLabelWidth = 150;
 const QVector<QPair<QString, QString>> accentChoices = {
     {"Cyan", "#4cc9f0"}, {"Violet", "#9b8cff"}, {"Mint", "#3ddc97"}, {"Amber", "#ffb454"}, {"Rose", "#ff6f91"}
 };
@@ -65,9 +67,9 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
     auto* scroll = new QScrollArea;
     scroll->setWidgetResizable(true); scroll->setFrameShape(QFrame::NoFrame);
     scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scroll->setViewportMargins(0, 0, 8, 0);
+    scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     auto* content = new QWidget; content->setObjectName("settingsContent");
-    auto* body = new QVBoxLayout(content); body->setContentsMargins(0, 2, 6, 0); body->setSpacing(12);
+    auto* body = new QVBoxLayout(content); body->setContentsMargins(0, 2, 12, 0); body->setSpacing(12);
     scroll->setWidget(content); layout->addWidget(scroll, 1);
 
     section(body, "Background");
@@ -113,7 +115,7 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
 
     section(body, "Terminal");
     auto* fontRow = new QHBoxLayout;
-    auto* fontLabel = new QLabel("Font"); fontLabel->setFixedWidth(132); fontRow->addWidget(fontLabel);
+    auto* fontLabel = new QLabel("Font"); fontLabel->setFixedWidth(kLabelWidth); fontRow->addWidget(fontLabel);
     font_ = new QComboBox; font_->setObjectName("fontCombo"); font_->setEditable(true); font_->setAccessibleName("Terminal font");
     font_->addItems({"Vazir Code Hack", "Cascadia Mono", "Cascadia Code", "Consolas", "JetBrains Mono", "Fira Code", "Courier New"});
     fontRow->addWidget(font_, 1); body->addLayout(fontRow); fontLabel->setBuddy(font_);
@@ -128,13 +130,13 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
     body->addWidget(snap_);
     connect(snap_, &QCheckBox::toggled, this, [this](bool enabled) { if (!loading_) { store_->settings.snap_windows = enabled; commit(); } });
     auto* shellRow = new QHBoxLayout;
-    auto* shellLabel = new QLabel("Default shell"); shellLabel->setFixedWidth(132); shellRow->addWidget(shellLabel);
+    auto* shellLabel = new QLabel("Default shell"); shellLabel->setFixedWidth(kLabelWidth); shellRow->addWidget(shellLabel);
     shell_ = new QComboBox; shell_->setObjectName("defaultShellCombo"); shell_->setAccessibleName("Default shell");
     for (const auto& profile : profiles) shell_->addItem(profile.label, profile.key);
     shellRow->addWidget(shell_, 1); body->addLayout(shellRow); shellLabel->setBuddy(shell_);
     connect(shell_, &QComboBox::currentIndexChanged, this, [this](int index) { if (!loading_ && index >= 0) { store_->settings.default_shell = shell_->itemData(index).toString(); commit(); } });
     auto* historyRow = new QHBoxLayout;
-    auto* historyLabel = new QLabel("Scrollback"); historyLabel->setFixedWidth(132); historyRow->addWidget(historyLabel);
+    auto* historyLabel = new QLabel("Scrollback"); historyLabel->setFixedWidth(kLabelWidth); historyRow->addWidget(historyLabel);
     scrollback_ = new QSpinBox; scrollback_->setObjectName("scrollbackSpin"); scrollback_->setRange(500, 50000);
     scrollback_->setSingleStep(500); scrollback_->setSuffix(" lines"); scrollback_->setAccessibleName("Scrollback lines");
     historyRow->addWidget(scrollback_, 1); body->addLayout(historyRow); historyLabel->setBuddy(scrollback_);
@@ -169,7 +171,7 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
 
 QSlider* SettingsDialog::addSlider(QVBoxLayout* layout, const QString& name, const QString& title, int low, int high, double scale, const QString& suffix) {
     auto* row = new QHBoxLayout;
-    auto* label = new QLabel(title); label->setFixedWidth(150); row->addWidget(label);
+    auto* label = new QLabel(title); label->setFixedWidth(kLabelWidth); row->addWidget(label);
     auto* slider = new QSlider(Qt::Horizontal); slider->setObjectName(name); slider->setRange(low, high); slider->setAccessibleName(title);
     slider->setPageStep(qMax(1, (high - low) / 10)); row->addWidget(slider, 1); label->setBuddy(slider);
     auto* value = new QLabel; value->setObjectName(name + "Value"); value->setFixedWidth(60); value->setAlignment(Qt::AlignRight | Qt::AlignVCenter); row->addWidget(value);
@@ -202,14 +204,10 @@ void SettingsDialog::updateStyle() {
         "#settingsTitle{font-size:20pt;font-weight:600;} #sectionLabel{color:%1;font-size:9pt;font-weight:700;margin-top:4px;}"
         "#mutedLabel,#shortcutHelp{color:#9aabc1;font-size:9pt;} #wallpaperPreview{background:#121e2e;border:1px solid #394659;border-radius:8px;}"
         "QPushButton{background:#182434;color:#dce7f5;border:1px solid #354153;border-radius:7px;padding:7px 12px;}"
-        "QPushButton:hover{background:#26374b;} QPushButton:focus,QComboBox:focus,QSpinBox:focus{border:1px solid %1;}"
+        "QPushButton:hover{background:#26374b;} QPushButton:focus,QComboBox:focus{border:1px solid %1;}"
         "#doneSettingsButton{background:%1;color:#07101a;font-weight:700;} #settingsError{color:#ff9aa4;}"
-        "QComboBox,QSpinBox{background:#152133;color:#dce7f5;border:1px solid #354153;border-radius:6px;padding:5px;}"
-        "QComboBox::drop-down{width:18px;border:0;background:transparent;}"
-        "QSpinBox{padding-right:22px;}"
-        "QSpinBox::up-button,QSpinBox::down-button{width:16px;border:0;background:transparent;}"
-        "QSpinBox::up-button{image:url(:/assets/spin-up.png);}"
-        "QSpinBox::down-button{image:url(:/assets/spin-down.png);}"
+        "QComboBox{background:#152133;color:#dce7f5;border:1px solid #354153;border-radius:6px;padding:5px;}"
+        "QSpinBox{color:#dce7f5;}"
         "QComboBox QAbstractItemView{background:#152133;color:#dce7f5;selection-background-color:#31506a;}"
         "QSlider::groove:horizontal{height:5px;background:#263448;border-radius:2px;} QSlider::sub-page:horizontal{background:%1;}"
         "QSlider::handle:horizontal{width:14px;margin:-5px 0;background:#edf6ff;border:2px solid %1;border-radius:7px;}"
@@ -246,3 +244,4 @@ void SettingsDialog::chooseWallpaper() {
     if (!path.isEmpty()) applyWallpaper(path);
 }
 void SettingsDialog::resetAppearance() { store_->resetAppearance(); updateStyle(); loadControls(); commit(); }
+

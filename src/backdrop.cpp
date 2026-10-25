@@ -9,7 +9,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QSaveFile>
-#include <QtMath>
+#include <algorithm>
 #include <windows.h>
 
 namespace {
@@ -86,7 +86,7 @@ void Backdrop::applySettings() {
         QImageReader reader(path);
         reader.setAutoTransform(true);
         source_ = reader.read();
-        if (source_.isNull() && path != store_->assetPath(QStringLiteral("wallpaper.jpg")) {
+        if (source_.isNull() && path != store_->assetPath(QStringLiteral("wallpaper.jpg"))) {
             path = store_->assetPath(QStringLiteral("wallpaper.jpg"));
             QImageReader fallback(path);
             fallback.setAutoTransform(true);

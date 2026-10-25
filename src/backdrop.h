@@ -7,6 +7,8 @@
 #include <QWidget>
 
 class DesktopSampler;
+class QPainter;
+class QPaintEvent;
 
 // Paints the terminal backdrop: either the wallpaper or a live, blurred copy of
 // the desktop that sits behind the window. The live copy is refreshed on a
@@ -21,13 +23,15 @@ public:
     void applySettings();
     void setWindow(quintptr window);
     void setRefreshInterval(int milliseconds);
+    void refresh();
     QImage sourceImage() const;
     static bool importWallpaper(const QString& source, const QString& destination, QString* error = nullptr);
 signals:
     void imageChanged();
+protected:
+    void paintEvent(QPaintEvent* event) override;
 private:
     void rebuild();
-    void refresh();
     void paintDesktop(QPainter& painter);
     SettingsStore* store_;
     DesktopSampler* sampler_ = nullptr;
