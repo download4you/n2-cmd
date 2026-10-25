@@ -1,26 +1,46 @@
 #include "backdrop.h"
+#include "desktop_sampler.h"
+#include "image_blur.h"
+#include <QDir>
 #include <QFileInfo>
-#include <QGraphicsBlurEffect>
-#include <QGraphicsPixmapItem>
-#include <QGraphicsScene>
 #include <QImageReader>
 #include <QImageWriter>
 #include <QLinearGradient>
 #include <QPainter>
 #include <QPainterPath>
 #include <QSaveFile>
-#include <QDir>
-#include <QDateTime>
-#include <algorithm>
+#include <QtMath>
 #include <windows.h>
 
+namespace {
+// The desktop is captured at a quarter of its physical size. The sample is
+// then blurred and stretched back to the window, which is both cheap and gives
+// the soft wash the backdrop is meant to look like.
+constexpr int kDesktopScale = 4;
+// Blur radius in physical pixels; the sampler converts it to sample pixels.
+constexpr int kDesktopBlurRadius = 26;
+}
+
 Backdrop::Backdrop(SettingsStore* store, QWidget* parent) : QWidget(parent), store_(store) {
-    setObjectName(QStringLiteral("terminalBackdrop"));
+    setObjectName("terminalBackdrop");
     setAttribute(Qt::WA_TranslucentBackground);
     debounce_.setSingleShot(true);
     debounce_.setInterval(160);
     connect(&debounce_, &QTimer::timeout, this, &Backdrop::rebuild);
+
+    sampler_ = new DesktopSampler(this);
+    connect(sampler_, &DesktopSampler::sampled, this,
+            [this](const QImage& image, const QPoint& origin, double pixelsPerPixel) {
+                desktop_ = image;
+                desktopOrigin_ = origin;
+                desktopPixelsPerPixel_ = pixelsPerPixel > 0.0 ? pixelsPerPixel : 1.0;
+                update();
+            });
     applySettings();
+}
+
+Backdrop::~Backdrop() {
+    if (sampler_) sampler_->shutdown();
 }
 
 bool Backdrop::importWallpaper(const QString& source, const QString& destination, QString* error) {
@@ -66,7 +86,7 @@ void Backdrop::applySettings() {
         QImageReader reader(path);
         reader.setAutoTransform(true);
         source_ = reader.read();
-        if (source_.isNull() && path != store_->assetPath(QStringLiteral("wallpaper.jpg"))) {
+        if (source_.isNull() && path != store_->assetPath(QStringLiteral("wallpaper.jpg")) {
             path = store_->assetPath(QStringLiteral("wallpaper.jpg"));
             QImageReader fallback(path);
             fallback.setAutoTransform(true);
@@ -79,60 +99,58 @@ void Backdrop::applySettings() {
         appliedBlur_ = -1;
     }
     if (appliedBlur_ != store_->settings.bg_blur) {
-        if (blurred_.isNull()) rebuild();
-        else debounce_.start();
+        if (blurred_.isNull()) rebuild(); else debounce_.start();
+    }
+    if (sampler_) {
+        sampler_->setScale(kDesktopScale);
+        sampler_->setBlurRadius(kDesktopBlurRadius);
+        sampler_->setActive(!store_->settings.opaque_background);
     }
     update();
 }
 
 void Backdrop::rebuild() {
     appliedBlur_ = store_->settings.bg_blur;
-    blurred_ = source_;
-    if (!source_.isNull() && appliedBlur_ > 0) {
-        QGraphicsScene scene;
-        auto* item = scene.addPixmap(QPixmap::fromImage(source_));
-        auto* effect = new QGraphicsBlurEffect;
-        effect->setBlurRadius(appliedBlur_);
-        effect->setBlurHints(QGraphicsBlurEffect::QualityHint);
-        item->setGraphicsEffect(effect);
-        scene.setSceneRect(QRectF(QPointF(0, 0), source_.size()));
-        blurred_ = QImage(source_.size(), QImage::Format_ARGB32_Premultiplied);
-        blurred_.fill(Qt::black);
-        QPainter painter(&blurred_);
-        scene.render(&painter, QRectF(QPointF(0, 0), blurred_.size()), scene.sceneRect());
-    }
+    blurred_ = blurImage(source_, appliedBlur_);
     update();
     emit imageChanged();
 }
 
-void Backdrop::setDesktopCapture(const QImage& image, const QPoint& origin) {
-    desktop_ = image;
-    desktopOrigin_ = origin;
-    desktopBlurred_ = image;
-    if (!image.isNull()) {
-        QGraphicsScene scene;
-        auto* item = scene.addPixmap(QPixmap::fromImage(image));
-        auto* effect = new QGraphicsBlurEffect;
-        effect->setBlurRadius(30);
-        effect->setBlurHints(QGraphicsBlurEffect::QualityHint);
-        item->setGraphicsEffect(effect);
-        scene.setSceneRect(QRectF(QPointF(0, 0), image.size()));
-        desktopBlurred_ = QImage(image.size(), QImage::Format_ARGB32_Premultiplied);
-        desktopBlurred_.fill(Qt::black);
-        QPainter painter(&desktopBlurred_);
-        scene.render(&painter, QRectF(QPointF(0, 0), desktopBlurred_.size()), scene.sceneRect());
-        desktopBlurred_.setDevicePixelRatio(image.devicePixelRatio());
+void Backdrop::setWindow(quintptr window) {
+    window_ = window;
+    if (sampler_) {
+        sampler_->setWindow(window);
+        sampler_->refresh();
     }
-    update();
 }
 
-void Backdrop::clearDesktopCapture() {
-    desktop_ = {};
-    desktopBlurred_ = {};
-    update();
+void Backdrop::setRefreshInterval(int milliseconds) {
+    if (sampler_) sampler_->setRefreshInterval(milliseconds);
 }
 
 QImage Backdrop::sourceImage() const { return source_; }
+
+void Backdrop::refresh() {
+    if (sampler_ && !store_->settings.opaque_background) sampler_->refresh();
+}
+
+void Backdrop::paintDesktop(QPainter& painter) {
+    if (desktop_.isNull() || desktopPixelsPerPixel_ <= 0.0 || !window_) return;
+    // The sample covers the whole virtual desktop, so the area under this window
+    // is picked by its position on the screen. The result stays locked to the
+    // desktop while the window is dragged instead of sliding along with it.
+    HWND handle = reinterpret_cast<HWND>(window_);
+    RECT client{};
+    POINT origin{client.left, client.top};
+    if (!GetClientRect(handle, &client) || !ClientToScreen(handle, &origin)) return;
+    const double ratio = desktopPixelsPerPixel_;
+    const QRectF source((origin.x - desktopOrigin_.x()) / ratio, (origin.y - desktopOrigin_.y()) / ratio,
+                        client.right / ratio, client.bottom / ratio);
+    const QRectF available(QPointF(0, 0), QSizeF(desktop_.size()));
+    const QRectF visible = source.intersected(available);
+    if (visible.isEmpty()) return;
+    painter.drawImage(QRectF(rect()), desktop_, visible);
+}
 
 void Backdrop::paintEvent(QPaintEvent*) {
     QPainter painter(this);
@@ -152,23 +170,15 @@ void Backdrop::paintEvent(QPaintEvent*) {
             size.scale(this->size(), Qt::KeepAspectRatioByExpanding);
             painter.drawImage(QRectF((width() - size.width()) / 2, (height() - size.height()) / 2, size.width(), size.height()), blurred_);
         }
-        painter.fillRect(rect(), QColor(3, 6, 12, qRound(255 * store_->settings.bg_dim)));
     } else {
         painter.fillRect(rect(), QColor(7, 12, 20));
-        if (!desktopBlurred_.isNull()) {
-            HWND hwnd = reinterpret_cast<HWND>(window()->winId());
-            POINT origin{0, 0};
-            ClientToScreen(hwnd, &origin);
-            RECT client{};
-            GetClientRect(hwnd, &client);
-            const QRectF source(origin.x - desktopOrigin_.x(), origin.y - desktopOrigin_.y(),
-                                client.right, client.bottom);
-            const double opacity = 1.0 - (1.0 - store_->settings.opacity) * (1.0 - store_->settings.background_blur_opacity);
-            painter.setOpacity(std::clamp(opacity, 0.0, 1.0));
-            painter.drawImage(QRectF(rect()), desktopBlurred_, source);
-            painter.setOpacity(1.0);
-        }
+        const double opacity = 1.0 - (1.0 - store_->settings.opacity) * (1.0 - store_->settings.background_blur_opacity);
+        painter.save();
+        painter.setOpacity(std::clamp(opacity, 0.0, 1.0));
+        paintDesktop(painter);
+        painter.restore();
     }
+    painter.fillRect(rect(), QColor(3, 6, 12, qRound(255 * store_->settings.bg_dim)));
     painter.setClipping(false);
     painter.setPen(QColor(255, 255, 255, 34));
     painter.setBrush(Qt::NoBrush);

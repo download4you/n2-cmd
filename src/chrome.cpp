@@ -25,17 +25,38 @@ QIcon controlIcon(const QString& kind, const QColor& color = QColor("#a4b2c7")) 
     else if (kind == "restore") { p.drawRect(QRectF(6, 9, 9, 9)); p.drawLine(9, 6, 18, 6); p.drawLine(18, 6, 18, 15); }
     else if (kind == "plus") { p.drawLine(7, 12, 17, 12); p.drawLine(12, 7, 12, 17); }
     else if (kind == "pin") {
-        QPainterPath pin;
-        pin.moveTo(9, 4); pin.lineTo(15, 4); pin.lineTo(13, 9);
-        pin.lineTo(17, 13); pin.lineTo(7, 13); pin.lineTo(11, 9); pin.closeSubpath();
-        p.drawPath(pin);
-        p.drawLine(QPointF(12, 13), QPointF(12, 21));
+        // A thumbtack: the head sits on top, the needle points down.
+        QPainterPath head;
+        head.moveTo(9.5, 4.5);
+        head.lineTo(14.5, 4.5);
+        head.lineTo(14.5, 7.5);
+        head.lineTo(16.5, 10);
+        head.lineTo(7.5, 10);
+        head.lineTo(9.5, 7.5);
+        head.closeSubpath();
+        p.drawPath(head);
+        p.drawLine(QPointF(12, 10), QPointF(12, 19.5));
     }
     else if (kind == "quick") {
         QPainterPath bolt;
         bolt.moveTo(14, 3); bolt.lineTo(6, 14); bolt.lineTo(11, 14);
         bolt.lineTo(9, 22); bolt.lineTo(19, 10); bolt.lineTo(14, 10); bolt.closeSubpath();
         p.fillPath(bolt, color);
+    } else if (kind == "settings") {
+        // A gear: a ring with eight teeth around it.
+        const QPointF center(12, 12);
+        QPainterPath gear;
+        const int teeth = 8;
+        const double inner = 5.6, outer = 9.2;
+        for (int i = 0; i < teeth * 4; ++i) {
+            const double angle = i * M_PI / (teeth * 2) - M_PI / 2;
+            const double radius = (i % 4 == 0 || i % 4 == 3) ? outer : inner;
+            const QPointF point = center + QPointF(std::cos(angle), std::sin(angle)) * radius;
+            if (i == 0) gear.moveTo(point); else gear.lineTo(point);
+        }
+        gear.closeSubpath();
+        p.drawPath(gear);
+        p.drawEllipse(center, 2.6, 2.6);
     } else {
         p.drawEllipse(QPointF(12, 12), 5, 5);
         p.drawEllipse(QPointF(12, 12), 2, 2);

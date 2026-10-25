@@ -65,6 +65,7 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
     auto* scroll = new QScrollArea;
     scroll->setWidgetResizable(true); scroll->setFrameShape(QFrame::NoFrame);
     scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scroll->setViewportMargins(0, 0, 8, 0);
     auto* content = new QWidget; content->setObjectName("settingsContent");
     auto* body = new QVBoxLayout(content); body->setContentsMargins(0, 2, 6, 0); body->setSpacing(12);
     scroll->setWidget(content); layout->addWidget(scroll, 1);
@@ -168,7 +169,7 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
 
 QSlider* SettingsDialog::addSlider(QVBoxLayout* layout, const QString& name, const QString& title, int low, int high, double scale, const QString& suffix) {
     auto* row = new QHBoxLayout;
-    auto* label = new QLabel(title); label->setFixedWidth(132); row->addWidget(label);
+    auto* label = new QLabel(title); label->setFixedWidth(150); row->addWidget(label);
     auto* slider = new QSlider(Qt::Horizontal); slider->setObjectName(name); slider->setRange(low, high); slider->setAccessibleName(title);
     slider->setPageStep(qMax(1, (high - low) / 10)); row->addWidget(slider, 1); label->setBuddy(slider);
     auto* value = new QLabel; value->setObjectName(name + "Value"); value->setFixedWidth(60); value->setAlignment(Qt::AlignRight | Qt::AlignVCenter); row->addWidget(value);
@@ -204,6 +205,11 @@ void SettingsDialog::updateStyle() {
         "QPushButton:hover{background:#26374b;} QPushButton:focus,QComboBox:focus,QSpinBox:focus{border:1px solid %1;}"
         "#doneSettingsButton{background:%1;color:#07101a;font-weight:700;} #settingsError{color:#ff9aa4;}"
         "QComboBox,QSpinBox{background:#152133;color:#dce7f5;border:1px solid #354153;border-radius:6px;padding:5px;}"
+        "QComboBox::drop-down{width:18px;border:0;background:transparent;}"
+        "QSpinBox{padding-right:22px;}"
+        "QSpinBox::up-button,QSpinBox::down-button{width:16px;border:0;background:transparent;}"
+        "QSpinBox::up-button{image:url(:/assets/spin-up.png);}"
+        "QSpinBox::down-button{image:url(:/assets/spin-down.png);}"
         "QComboBox QAbstractItemView{background:#152133;color:#dce7f5;selection-background-color:#31506a;}"
         "QSlider::groove:horizontal{height:5px;background:#263448;border-radius:2px;} QSlider::sub-page:horizontal{background:%1;}"
         "QSlider::handle:horizontal{width:14px;margin:-5px 0;background:#edf6ff;border:2px solid %1;border-radius:7px;}"

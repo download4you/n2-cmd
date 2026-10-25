@@ -3,5 +3,7 @@
   <file alias="config/quick_commands.lua">../config/quick_commands.lua</file>
   <file alias="assets/wallpaper.jpg">../assets/wallpaper.jpg</file>
   <file alias="assets/icon.png">../assets/icon.png</file>
+  <file alias="assets/spin-up.png">../assets/spin-up.png</file>
+  <file alias="assets/spin-down.png">../assets/spin-down.png</file>
   <file alias="fonts/Vazir-Code-Hack.ttf">../fonts/Vazir-Code-Hack.ttf</file>
 </qresource></RCC>

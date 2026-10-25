@@ -31,7 +31,8 @@ add_library(n2_terminal STATIC src/conpty_session.cpp src/conpty_session.h
     src/terminal_model.cpp src/terminal_model.h src/terminal_view.cpp src/terminal_view.h)
 target_link_libraries(n2_terminal PUBLIC n2_state Qt6::Widgets vterm)
 add_library(n2_ui STATIC src/main_window.cpp src/main_window.h src/settings_dialog.cpp src/settings_dialog.h
-    src/backdrop.cpp src/backdrop.h src/chrome.cpp src/chrome.h)
+    src/backdrop.cpp src/backdrop.h src/chrome.cpp src/chrome.h src/themed_style.cpp src/themed_style.h
+    src/desktop_sampler.cpp src/desktop_sampler.h src/image_blur.cpp src/image_blur.h)
 target_link_libraries(n2_ui PUBLIC n2_terminal)
 qt_add_executable(n2-cmd WIN32 src/main.cpp src/resources.qrc src/windows.rc src/app.manifest)
 target_link_libraries(n2-cmd PRIVATE n2_ui)

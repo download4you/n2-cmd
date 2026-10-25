@@ -84,7 +84,8 @@ MainWindow::MainWindow(SettingsStore* store, QVector<ShellProfile> profiles, QWi
     qApp->installEventFilter(this);
     restoreGeometryFromSettings(); applySettings();
     newTab(store_->settings.default_shell);
-    captureBackdrop();
+    backdrop_->setWindow(reinterpret_cast<quintptr>(winId()));
+    backdrop_->setRefreshInterval(700);
 }
 
 MainWindow::~MainWindow() {
@@ -464,43 +465,11 @@ void MainWindow::updateBackdropEffect() {
         setter(hwnd, &data);
     }
 }
-void MainWindow::captureBackdrop() {
-    if (!backdrop_) return;
-    const int left = GetSystemMetrics(SM_XVIRTUALSCREEN);
-    const int top = GetSystemMetrics(SM_YVIRTUALSCREEN);
-    const int width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-    const int height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-    if (width <= 0 || height <= 0) return;
-    const bool visible = isVisible();
-    if (visible) {
-        setWindowOpacity(0.0);
-        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(40);
-    }
-    HDC screen = GetDC(nullptr);
-    HDC memory = CreateCompatibleDC(screen);
-    HBITMAP bitmap = CreateCompatibleBitmap(screen, width, height);
-    HGDIOBJ previous = SelectObject(memory, bitmap);
-    BitBlt(memory, 0, 0, width, height, screen, left, top, SRCCOPY);
-    BITMAPINFO info{};
-    info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    info.bmiHeader.biWidth = width;
-    info.bmiHeader.biHeight = -height;
-    info.bmiHeader.biPlanes = 1;
-    info.bmiHeader.biBitCount = 32;
-    info.bmiHeader.biCompression = BI_RGB;
-    QImage image(width, height, QImage::Format_RGB32);
-    GetDIBits(memory, bitmap, 0, height, image.bits(), &info, DIB_RGB_COLORS);
-    SelectObject(memory, previous);
-    DeleteObject(bitmap);
-    DeleteDC(memory);
-    ReleaseDC(nullptr, screen);
-    if (visible) setWindowOpacity(1.0);
-    if (!image.isNull()) backdrop_->setDesktopCapture(image, QPoint(left, top));
-}
 void MainWindow::showEvent(QShowEvent* event) {
     QMainWindow::showEvent(event);
     updateBackdropEffect();
+    backdrop_->setWindow(reinterpret_cast<quintptr>(winId()));
+    backdrop_->refresh();
 }
 
 void MainWindow::restoreGeometryFromSettings() {

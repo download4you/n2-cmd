@@ -2,6 +2,7 @@
 #include "settings_dialog.h"
 #include "backdrop.h"
 #include "chrome.h"
+#include "image_blur.h"
 #include "terminal_view.h"
 #include <QtTest>
 #include <QAction>
@@ -40,12 +41,38 @@ private slots:
     void settingsControlsAndReset();
     void imageFormatsAndAtomicFailure();
     void allExifOrientations();
+    void blurSmoothsWithoutShifting();
     void tabNamesIdsAndExport();
     void tabMenuTargetsStableIdentity();
     void quickCommandMenusAndPersistence();
     void physicalKeysAndButtons();
     void optionalVisualSnapshot();
 };
+
+void NativeUiTests::blurSmoothsWithoutShifting() {
+    QImage image(24, 16, QImage::Format_ARGB32);
+    for (int y = 0; y < image.height(); ++y)
+        for (int x = 0; x < image.width(); ++x)
+            image.setPixelColor(x, y, ((x + y) % 2) ? QColor(255, 255, 255) : QColor(0, 0, 0));
+    const QImage blurred = blurImage(image, 4);
+    QCOMPARE(blurred.size(), image.size());
+    // A checkerboard blurred hard must lose its extremes but keep its average.
+    int light = 0, dark = 0;
+    for (int y = 0; y < blurred.height(); ++y)
+        for (int x = 0; x < blurred.width(); ++x) {
+            const int value = blurred.pixelColor(x, y).red();
+            if (value > 200) ++light;
+            else if (value < 55) ++dark;
+        }
+    QCOMPARE(light + dark, 0);
+    // A uniform image must stay uniform.
+    QImage flat(8, 8, QImage::Format_ARGB32); flat.fill(QColor(30, 90, 160));
+    const QImage flatBlurred = blurImage(flat, 6);
+    QCOMPARE(flatBlurred.pixelColor(0, 0), QColor(30, 90, 160));
+    QCOMPARE(flatBlurred.pixelColor(7, 7), QColor(30, 90, 160));
+    // A zero radius leaves the image untouched.
+    QCOMPARE(blurImage(image, 0).pixelColor(3, 3), image.pixelColor(3, 3));
+}
 
 void NativeUiTests::settingsControlsAndReset() {
     QTemporaryDir directory; QVERIFY(directory.isValid());

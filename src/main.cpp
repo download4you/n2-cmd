@@ -1,5 +1,6 @@
 #include "main_window.h"
 #include "settings_store.h"
+#include "themed_style.h"
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDir>
@@ -39,7 +40,7 @@ int main(int argc, char** argv) {
     QApplication::setOrganizationName(QStringLiteral("n2-cmd"));
     QApplication::setApplicationVersion(QStringLiteral(N2_CMD_VERSION));
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/assets/icon.png")));
-    app.setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
+    app.setStyle(new ThemedStyle(QStyleFactory::create(QStringLiteral("Fusion"))));
     QFontDatabase::addApplicationFont(QStringLiteral(":/fonts/Vazir-Code-Hack.ttf"));
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("A native C/C++ and Lua terminal for Windows."));

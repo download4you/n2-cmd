@@ -80,7 +80,6 @@ private:
     void saveGeometryToSettings();
     void updateWindowMask();
     void updateBackdropEffect();
-    void captureBackdrop();
     void beginWindowMove();
     void applySnapFromCursor();
     void showError(const QString& message);
