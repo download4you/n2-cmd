@@ -2,6 +2,7 @@
 #include "settings_dialog.h"
 #include "backdrop.h"
 #include "chrome.h"
+#include "desktop_sampler.h"
 #include "image_blur.h"
 #include "terminal_view.h"
 #include <QtTest>
@@ -42,6 +43,7 @@ private slots:
     void imageFormatsAndAtomicFailure();
     void allExifOrientations();
     void blurSmoothsWithoutShifting();
+    void desktopSamplerDeliversRepeatedSamples();
     void tabNamesIdsAndExport();
     void tabMenuTargetsStableIdentity();
     void quickCommandMenusAndPersistence();
@@ -72,6 +74,38 @@ void NativeUiTests::blurSmoothsWithoutShifting() {
     QCOMPARE(flatBlurred.pixelColor(7, 7), QColor(30, 90, 160));
     // A zero radius leaves the image untouched.
     QCOMPARE(blurImage(image, 0).pixelColor(3, 3), image.pixelColor(3, 3));
+}
+
+void NativeUiTests::desktopSamplerDeliversRepeatedSamples() {
+    // The live backdrop must keep producing samples instead of freezing on the
+    // first frame, so the sampler is asked for several rounds and each one has
+    // to arrive with a usable image.
+    QWidget host;
+    host.setWindowFlags(Qt::Window);
+    host.resize(320, 240);
+    host.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&host));
+
+    DesktopSampler sampler;
+    sampler.setWindow(static_cast<quintptr>(host.winId()));
+    sampler.setScale(8);
+    sampler.setBlurRadius(4);
+    sampler.setRefreshInterval(120);
+    sampler.setActive(true);
+    QSignalSpy spy(&sampler, &DesktopSampler::sampled);
+    sampler.refresh();
+    QVERIFY(spy.wait(5000));
+    QCOMPARE(spy.count(), 1);
+    const QImage first = spy.at(0).at(0).value<QImage>();
+    QVERIFY(!first.isNull());
+    QVERIFY(first.width() > 0);
+    QVERIFY(first.height() > 0);
+    // A second sample has to follow, which is what keeps the backdrop live.
+    QVERIFY(spy.wait(5000));
+    QCOMPARE(spy.count(), 2);
+    const QImage second = spy.at(1).at(0).value<QImage>();
+    QCOMPARE(second.size(), first.size());
+    sampler.shutdown();
 }
 
 void NativeUiTests::settingsControlsAndReset() {

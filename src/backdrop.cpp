@@ -13,12 +13,15 @@
 #include <windows.h>
 
 namespace {
-// The desktop is captured at a quarter of its physical size. The sample is
-// then blurred and stretched back to the window, which is both cheap and gives
-// the soft wash the backdrop is meant to look like.
-constexpr int kDesktopScale = 4;
+// The desktop is captured at half of its physical size. The sample is then
+// blurred and stretched back to the window, which is both cheap and gives the
+// soft wash the backdrop is meant to look like. Half resolution keeps the
+// stretched result smooth instead of blocky.
+constexpr int kDesktopScale = 2;
 // Blur radius in physical pixels; the sampler converts it to sample pixels.
 constexpr int kDesktopBlurRadius = 26;
+// Number of steps the cross-fade between two live samples runs over.
+constexpr int kFadeSteps = 6;
 }
 
 Backdrop::Backdrop(SettingsStore* store, QWidget* parent) : QWidget(parent), store_(store) {
@@ -29,13 +32,28 @@ Backdrop::Backdrop(SettingsStore* store, QWidget* parent) : QWidget(parent), sto
     connect(&debounce_, &QTimer::timeout, this, &Backdrop::rebuild);
 
     sampler_ = new DesktopSampler(this);
+    // The sampler delivers from its worker thread, so the hand-off is queued
+    // explicitly; the image is then stored and repainted on the interface
+    // thread.
     connect(sampler_, &DesktopSampler::sampled, this,
             [this](const QImage& image, const QPoint& origin, double pixelsPerPixel) {
+                // The previous frame is kept for a short cross-fade, so the
+                // backdrop flows into its new content instead of popping.
+                fading_ = desktop_;
                 desktop_ = image;
                 desktopOrigin_ = origin;
                 desktopPixelsPerPixel_ = pixelsPerPixel > 0.0 ? pixelsPerPixel : 1.0;
+                fadeStep_ = 0;
+                fadeTimer_.start();
                 update();
-            });
+            }, Qt::QueuedConnection);
+
+    fadeTimer_.setInterval(40);
+    connect(&fadeTimer_, &QTimer::timeout, this, [this] {
+        ++fadeStep_;
+        if (fadeStep_ >= kFadeSteps || fading_.isNull()) { fadeTimer_.stop(); fading_ = {}; }
+        update();
+    });
     applySettings();
 }
 
@@ -149,7 +167,18 @@ void Backdrop::paintDesktop(QPainter& painter) {
     const QRectF available(QPointF(0, 0), QSizeF(desktop_.size()));
     const QRectF visible = source.intersected(available);
     if (visible.isEmpty()) return;
-    painter.drawImage(QRectF(rect()), desktop_, visible);
+    const QRectF target(rect());
+    // While a cross-fade runs, the outgoing frame is drawn first and the new
+    // one is blended over it, so the change reads as a smooth transition.
+    if (!fading_.isNull()) {
+        const QRectF fadingAvailable(QPointF(0, 0), QSizeF(fading_.size()));
+        const QRectF fadingVisible = source.intersected(fadingAvailable);
+        if (!fadingVisible.isEmpty()) painter.drawImage(target, fading_, fadingVisible);
+        const qreal progress = qBound(0.0, qreal(fadeStep_) / qreal(kFadeSteps), 1.0);
+        painter.setOpacity(progress);
+    }
+    painter.drawImage(target, desktop_, visible);
+    painter.setOpacity(1.0);
 }
 
 void Backdrop::paintEvent(QPaintEvent*) {

@@ -144,7 +144,8 @@ void DesktopSampler::capture() {
     const double ratio = grabbed.pixelsPerPixel > 0.0 ? grabbed.pixelsPerPixel : 1.0;
     const int radius = radius_.load(std::memory_order_relaxed);
     const int sampleRadius = qMax(1, qRound(radius / ratio));
-    // Emitted from the worker thread; the receiver lives in the interface
-    // thread, so the connection delivers the sample there.
-    emit sampled(blurImage(grabbed.image, sampleRadius), grabbed.origin, ratio);
+    // The image is produced here and delivered to the interface thread by the
+    // queued connection, so the copy is made while the sample is still valid.
+    const QImage image = blurImage(grabbed.image, sampleRadius);
+    emit sampled(image, grabbed.origin, ratio);
 }

@@ -25,17 +25,15 @@ QIcon controlIcon(const QString& kind, const QColor& color = QColor("#a4b2c7")) 
     else if (kind == "restore") { p.drawRect(QRectF(6, 9, 9, 9)); p.drawLine(9, 6, 18, 6); p.drawLine(18, 6, 18, 15); }
     else if (kind == "plus") { p.drawLine(7, 12, 17, 12); p.drawLine(12, 7, 12, 17); }
     else if (kind == "pin") {
-        // A thumbtack: the head sits on top, the needle points down.
-        QPainterPath head;
-        head.moveTo(9.5, 4.5);
-        head.lineTo(14.5, 4.5);
-        head.lineTo(14.5, 7.5);
-        head.lineTo(16.5, 10);
-        head.lineTo(7.5, 10);
-        head.lineTo(9.5, 7.5);
-        head.closeSubpath();
-        p.drawPath(head);
-        p.drawLine(QPointF(12, 10), QPointF(12, 19.5));
+        // A thumbtack: a flat cap on top, a body that narrows into a needle.
+        p.drawRoundedRect(QRectF(8, 4.5, 8, 3), 1.2, 1.2);
+        QPainterPath body;
+        body.moveTo(9.6, 7.5);
+        body.lineTo(11.1, 14.5);
+        body.lineTo(12.9, 14.5);
+        body.lineTo(14.4, 7.5);
+        p.drawPath(body);
+        p.drawLine(QPointF(12, 14.5), QPointF(12, 19.5));
     }
     else if (kind == "quick") {
         QPainterPath bolt;

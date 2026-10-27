@@ -38,9 +38,11 @@ private:
     quintptr window_ = 0;
     QString loadedPath_;
     QString loadedStamp_;
-    QImage source_, blurred_, desktop_;
+    QImage source_, blurred_, desktop_, fading_;
     QPoint desktopOrigin_;
     double desktopPixelsPerPixel_ = 1.0;
     int appliedBlur_ = -1;
+    int fadeStep_ = 0;
     QTimer debounce_;
+    QTimer fadeTimer_;
 };
