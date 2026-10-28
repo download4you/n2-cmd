@@ -259,11 +259,13 @@ void NativeUiTests::mainWindowDisplaysLiveBlur() {
     auto sampledImage = [&] { return window.grab().toImage(); };
     auto sampledColor = [&] { return averageColor(sampledImage()); };
     auto* backdrop = window.findChild<Backdrop*>(); QVERIFY(backdrop);
+    auto* sampler = window.findChild<DesktopSampler*>(); QVERIFY(sampler);
     qInfo() << "Main window blur sample" << sampledColor() << "edge energy" << edgeEnergy(sampledImage())
             << "image size" << sampledImage().size() << "DPR" << window.devicePixelRatioF()
             << "geometry" << window.geometry() << "frame" << window.frameGeometry()
             << "native window" << backdrop->nativeWindow() << "desktop null" << backdrop->desktopImage().isNull()
-            << "desktop size" << backdrop->desktopImage().size();
+            << "desktop size" << backdrop->desktopImage().size()
+            << "sampler window" << sampler->captureWindow() << "sampler active" << sampler->isActive();
     QTRY_VERIFY_WITH_TIMEOUT(sampledColor().red() > sampledColor().green() + 40 && sampledColor().red() > sampledColor().blue() + 40, 10000);
     QTRY_VERIFY_WITH_TIMEOUT(edgeEnergy(sampledImage()) < originalEnergy * 0.7, 10000);
 

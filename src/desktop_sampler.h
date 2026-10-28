@@ -21,6 +21,8 @@ public:
     void setBlurRadius(int radius) { radius_.store(radius < 0 ? 0 : radius, std::memory_order_relaxed); }
     void setRefreshInterval(int milliseconds) { interval_.store(milliseconds < 120 ? 120 : milliseconds, std::memory_order_relaxed); }
     void setActive(bool active);
+    quintptr captureWindow() const { return window_.load(std::memory_order_relaxed); }
+    bool isActive() const { return active_.load(std::memory_order_relaxed); }
     void refresh();
     void shutdown();
 
