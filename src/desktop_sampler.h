@@ -23,6 +23,7 @@ public:
     void setActive(bool active);
     quintptr captureWindow() const { return window_.load(std::memory_order_relaxed); }
     bool isActive() const { return active_.load(std::memory_order_relaxed); }
+    quintptr affinityError() const { return affinityError_; }
     void refresh();
     void shutdown();
 
@@ -41,6 +42,7 @@ private:
     std::atomic<bool> active_{false};
     quintptr requestedWindow_ = 0;
     quintptr affinityWindow_ = 0;
+    quintptr affinityError_ = 0;
     std::mutex mutex_;
     std::condition_variable wake_;
     bool stopping_ = false;

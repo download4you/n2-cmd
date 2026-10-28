@@ -111,7 +111,9 @@ void DesktopSampler::updateCaptureWindow() {
     if (!active_.load(std::memory_order_relaxed) || !requestedWindow_) return;
 
     HWND handle = reinterpret_cast<HWND>(requestedWindow_);
-    if (!isOwnWindow(handle) || !SetWindowDisplayAffinity(handle, WDA_EXCLUDEFROMCAPTURE)) return;
+    if (!isOwnWindow(handle)) { affinityError_ = ERROR_INVALID_HANDLE; return; }
+    if (!SetWindowDisplayAffinity(handle, WDA_EXCLUDEFROMCAPTURE)) { affinityError_ = GetLastError(); return; }
+    affinityError_ = 0;
     affinityWindow_ = requestedWindow_;
     window_.store(requestedWindow_, std::memory_order_relaxed);
 }

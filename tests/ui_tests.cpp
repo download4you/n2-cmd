@@ -266,7 +266,8 @@ void NativeUiTests::mainWindowDisplaysLiveBlur() {
             << "native window" << backdrop->nativeWindow() << "desktop null" << backdrop->desktopImage().isNull()
             << "desktop size" << backdrop->desktopImage().size()
             << "sampler window" << sampler->captureWindow() << "sampler active" << sampler->isActive()
-            << "extended style" << QString::number(GetWindowLongPtr(reinterpret_cast<HWND>(window.winId()), GWL_EXSTYLE), 16);
+            << "extended style" << QString::number(GetWindowLongPtr(reinterpret_cast<HWND>(window.winId()), GWL_EXSTYLE), 16)
+            << "affinity error" << sampler->affinityError();
     QTRY_VERIFY_WITH_TIMEOUT(!backdrop->desktopImage().isNull(), 10000);
     QTRY_VERIFY_WITH_TIMEOUT(sampledColor().red() > sampledColor().green() + 40 && sampledColor().red() > sampledColor().blue() + 40, 10000);
     QTRY_VERIFY_WITH_TIMEOUT(edgeEnergy(sampledImage()) < originalEnergy * 0.7, 10000);
