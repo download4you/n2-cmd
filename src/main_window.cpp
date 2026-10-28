@@ -440,8 +440,11 @@ void MainWindow::updateWindowMask() {
 }
 void MainWindow::showEvent(QShowEvent* event) {
     QMainWindow::showEvent(event);
-    backdrop_->setWindow(static_cast<quintptr>(winId()));
-    backdrop_->refresh();
+    QTimer::singleShot(0, this, [this] {
+        if (!backdrop_) return;
+        backdrop_->setWindow(static_cast<quintptr>(winId()));
+        backdrop_->refresh();
+    });
 }
 
 void MainWindow::restoreGeometryFromSettings() {
