@@ -70,7 +70,7 @@ jobs:
           )
           if ($runtime) { $files += $runtime.FullName }
           $files += @(Get-ChildItem docs\screenshots -Filter '*.png' | Select-Object -ExpandProperty FullName)
-          & gh release create $tag @files --title "n2-cmd 1.1.0" --notes-file docs/RELEASE-NOTES-1.1.0.md
+          & gh release create $tag @files --title "n2-cmd 1.1.1" --notes-file docs/RELEASE-NOTES-1.1.1.md
           if ($LASTEXITCODE -ne 0) { throw 'GitHub release creation failed.' }
 
       - name: Upload workflow artifacts

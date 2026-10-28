@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(n2-cmd VERSION 1.1.0 LANGUAGES C CXX)
+project(n2-cmd VERSION 1.1.1 LANGUAGES C CXX)
 if(NOT WIN32)
     message(FATAL_ERROR "n2-cmd requires Windows 10 version 1809 or newer (ConPTY).")
 endif()

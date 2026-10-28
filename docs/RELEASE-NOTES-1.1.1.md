@@ -1,4 +1,4 @@
-# n2-cmd 1.1.0
+# n2-cmd 1.1.1
 
 n2-cmd is a native Windows terminal for Persian and mixed-direction text, built with C, C++ and Lua. Qt Widgets provides the interface, Win32 ConPTY runs shell sessions, libvterm parses terminal output, and Lua supplies configuration.
 
@@ -13,6 +13,7 @@ n2-cmd is a native Windows terminal for Persian and mixed-direction text, built 
 ## Highlights
 
 - **Real live background blur:** continuously refreshed desktop content with self-capture prevention and safe capture-affinity restoration.
+- **Reliable capture startup:** retries capture affinity, defers the native-window handoff until exposure, and avoids a layered top-level window so capture works on Windows Server without redirection-memory failures.
 - **Lower backdrop latency:** captures only the console's client region rather than the full virtual desktop. The default refresh interval is 200 ms and the cross-fade is 75 ms.
 - **Measured improvement:** five full-window color-change tests had a 405 ms median and 414 ms worst result, down from an 1117 ms baseline.
 - **Configurable live background:** 0–40 px live blur strength and a 100–1000 ms refresh interval. Lower refresh values are more responsive but may use more CPU.
@@ -23,7 +24,7 @@ n2-cmd is a native Windows terminal for Persian and mixed-direction text, built 
 
 ## Install
 
-Run `n2-cmd-1.1.0-windows-x64-setup.exe`. The installer uses a per-user installation under `%LOCALAPPDATA%\Programs\n2-cmd`; administrator rights are not required.
+Run `n2-cmd-1.1.1-windows-x64-setup.exe`. The installer uses a per-user installation under `%LOCALAPPDATA%\Programs\n2-cmd`; administrator rights are not required.
 
 A portable ZIP is also attached. Extract it to a writable folder and run `n2-cmd.exe`. Keep the DLLs and plugin folders beside the executable.
 

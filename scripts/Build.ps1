@@ -30,7 +30,7 @@ $originalPath = $env:PATH
 try {
     $env:PATH = (Join-Path $QtRoot 'bin') + ';' + $originalPath
     & $deploy ('--' + $Configuration.ToLowerInvariant()) --no-translations --no-plugins --no-network `
-        --skip-plugin-types iconengines,generic,styles --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler `
+        --exclude-plugins qsvg,qsvgicon --skip-plugin-types iconengines,generic,styles --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler `
         --compiler-runtime (Join-Path $target 'n2-cmd.exe')
     if ($LASTEXITCODE -ne 0) { throw 'Qt runtime deployment failed.' }
 } finally { $env:PATH = $originalPath }

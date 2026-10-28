@@ -54,7 +54,7 @@ Copy-Item -LiteralPath (Join-Path $project 'docs\FEATURES.md') -Destination (Joi
 $originalPath = $env:PATH
 try {
     $env:PATH = (Join-Path $QtRoot 'bin') + ';' + $originalPath
-    & $deploy --release --no-translations --no-plugins --no-network --skip-plugin-types iconengines,generic,styles --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --no-compiler-runtime (Join-Path $stage 'n2-cmd.exe')
+    & $deploy --release --no-translations --no-plugins --no-network --exclude-plugins qsvg,qsvgicon --skip-plugin-types iconengines,generic,styles --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --no-compiler-runtime (Join-Path $stage 'n2-cmd.exe')
     if ($LASTEXITCODE -ne 0) { throw 'Qt deployment failed.' }
 } finally { $env:PATH = $originalPath }
 

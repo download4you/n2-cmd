@@ -36,7 +36,7 @@ not make that tool an application dependency.
 
 ## Install on Windows
 
-Download `n2-cmd-1.1.0-windows-x64-setup.exe` from GitHub Releases and run it.
+Download `n2-cmd-1.1.1-windows-x64-setup.exe` from GitHub Releases and run it.
 The installer uses a per-user installation under `%LOCALAPPDATA%\Programs\n2-cmd`,
 creates a Start Menu entry and optional desktop shortcut, and registers an
 uninstaller. Administrator rights are not required.
@@ -129,12 +129,12 @@ To build the executable installer after packaging, install Inno Setup 6 and run:
 & "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" .\installer\n2-cmd.iss
 ```
 
-The installer is written to `dist\n2-cmd-1.1.0-windows-x64-setup.exe`.
+The installer is written to `dist\n2-cmd-1.1.1-windows-x64-setup.exe`.
 
 To inspect an extracted package again:
 
 ```powershell
-.\scripts\Inspect-Package.ps1 -PackageDirectory .\dist\n2-cmd-1.1.0-windows-x64-<stamp>
+.\scripts\Inspect-Package.ps1 -PackageDirectory .\dist\n2-cmd-1.1.1-windows-x64-<stamp>
 ```
 
 ## Settings and Lua
