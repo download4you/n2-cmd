@@ -24,6 +24,8 @@ public:
     void refresh();
     void stopSampling();
     QImage sourceImage() const;
+    QImage desktopImage() const { return desktop_; }
+    quintptr nativeWindow() const { return window_; }
     static bool importWallpaper(const QString& source, const QString& destination, QString* error = nullptr);
 signals:
     void imageChanged();
