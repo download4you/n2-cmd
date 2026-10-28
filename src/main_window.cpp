@@ -54,7 +54,7 @@ MainWindow::MainWindow(SettingsStore* store, QVector<ShellProfile> profiles, QWi
     setObjectName("mainWindow"); setWindowTitle("n2-cmd");
     setWindowIcon(QIcon(store_->assetPath("icon.png")));
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint);
-    setAttribute(Qt::WA_TranslucentBackground); setAutoFillBackground(false); setMinimumSize(860, 540);
+    setAttribute(Qt::WA_TranslucentBackground, false); setAutoFillBackground(false); setMinimumSize(860, 540);
     backdrop_ = new Backdrop(store_, this); setCentralWidget(backdrop_);
     auto* layout = new QVBoxLayout(backdrop_); layout->setContentsMargins(1, 1, 1, 1); layout->setSpacing(0);
     topbar_ = new TopBar(backdrop_); stack_ = new QStackedWidget(backdrop_); stack_->setObjectName("terminalStack");
@@ -434,9 +434,10 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event) {
 }
 
 void MainWindow::updateWindowMask() {
-    // The rounded corners are painted by Backdrop. A native mask clips the
-    // right and bottom edges under fractional display scaling.
-    clearMask();
+    if (isMaximized() || isFullScreen()) { clearMask(); return; }
+    QPainterPath outline;
+    outline.addRoundedRect(QRectF(rect()).adjusted(.5, .5, -.5, -.5), 13, 13);
+    setMask(QRegion(outline.toFillPolygon().toPolygon()));
 }
 void MainWindow::showEvent(QShowEvent* event) {
     QMainWindow::showEvent(event);
