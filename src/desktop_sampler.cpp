@@ -1,6 +1,7 @@
 #include "desktop_sampler.h"
 #include "image_blur.h"
 #include <QImage>
+#include <QTimer>
 #include <windows.h>
 
 namespace {
@@ -97,6 +98,7 @@ DesktopSampler::~DesktopSampler() { shutdown(); }
 void DesktopSampler::setWindow(quintptr window) {
     requestedWindow_ = window;
     updateCaptureWindow();
+    QTimer::singleShot(0, this, [this] { updateCaptureWindow(); refresh(); });
 }
 
 void DesktopSampler::updateCaptureWindow() {
@@ -138,6 +140,7 @@ void DesktopSampler::refresh() {
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (stopping_) return;
+        if (requestedWindow_ && !affinityWindow_ && active_.load(std::memory_order_relaxed)) updateCaptureWindow();
         pending_ = true;
     }
     wake_.notify_all();

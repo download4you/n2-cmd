@@ -89,6 +89,7 @@ private slots:
     void imageFormatsAndAtomicFailure();
     void allExifOrientations();
     void blurSmoothsWithoutShifting();
+    void desktopSamplerStartsBeforeWindowExposed();
     void desktopSamplerProducesLiveBlur();
     void mainWindowDisplaysLiveBlur();
     void tabNamesIdsAndExport();
@@ -121,6 +122,25 @@ void NativeUiTests::blurSmoothsWithoutShifting() {
     QCOMPARE(flatBlurred.pixelColor(7, 7), QColor(30, 90, 160));
     // A zero radius leaves the image untouched.
     QCOMPARE(blurImage(image, 0).pixelColor(3, 3), image.pixelColor(3, 3));
+}
+
+void NativeUiTests::desktopSamplerStartsBeforeWindowExposed() {
+    QWidget host;
+    host.setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    host.resize(320, 240);
+    DesktopSampler sampler;
+    QSignalSpy spy(&sampler, &DesktopSampler::sampled);
+    sampler.setWindow(static_cast<quintptr>(host.winId()));
+    sampler.setScale(8);
+    sampler.setBlurRadius(4);
+    sampler.setRefreshInterval(120);
+    sampler.setActive(true);
+    host.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&host));
+    sampler.refresh();
+    QTRY_VERIFY_WITH_TIMEOUT(!spy.isEmpty(), 5000);
+    QVERIFY(!spy.first().at(0).value<QImage>().isNull());
+    sampler.shutdown();
 }
 
 void NativeUiTests::desktopSamplerProducesLiveBlur() {
