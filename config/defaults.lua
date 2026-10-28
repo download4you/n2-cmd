@@ -4,6 +4,8 @@ return {
     background = "",
     bg_dim = 0.58,
     bg_blur = 8,
+    backdrop_blur_radius = 26,
+    backdrop_refresh_ms = 200,
     terminal_tint = 0.34,
     font_family = "Vazir Code Hack",
     font_size = 10.0,

@@ -90,6 +90,8 @@ void overlaySettings(Settings& settings, const QJsonObject& values) {
     number("background_blur_opacity", settings.background_blur_opacity);
     number("font_size", settings.font_size);
     integer("bg_blur", settings.bg_blur);
+    integer("backdrop_blur_radius", settings.backdrop_blur_radius);
+    integer("backdrop_refresh_ms", settings.backdrop_refresh_ms);
     integer("scrollback", settings.scrollback);
     integer("window_width", settings.window_width);
     integer("window_height", settings.window_height);
@@ -136,6 +138,8 @@ QJsonObject settingsObject(const Settings& settings) {
         {QStringLiteral("background"), settings.background},
         {QStringLiteral("bg_dim"), settings.bg_dim},
         {QStringLiteral("bg_blur"), settings.bg_blur},
+        {QStringLiteral("backdrop_blur_radius"), settings.backdrop_blur_radius},
+        {QStringLiteral("backdrop_refresh_ms"), settings.backdrop_refresh_ms},
         {QStringLiteral("terminal_tint"), settings.terminal_tint},
         {QStringLiteral("font_family"), settings.font_family},
         {QStringLiteral("font_size"), settings.font_size},
@@ -176,6 +180,7 @@ QJsonObject luaSettingsObject(lua_State* state) {
     constexpr const char* fields[] = {
         "opacity", "background", "bg_dim", "bg_blur", "terminal_tint", "font_family",
         "font_size", "copy_on_select", "snap_windows", "opaque_background", "background_blur_opacity",
+        "backdrop_blur_radius", "backdrop_refresh_ms",
         "default_shell", "accent", "scrollback",
         "window_width", "window_height", "window_x", "window_y", "maximized",
     };
@@ -439,6 +444,8 @@ void SettingsStore::sanitize() {
     settings.opacity = bounded(settings.opacity, 0.30, 1.0, defaults.opacity);
     settings.bg_dim = bounded(settings.bg_dim, 0.0, 0.92, defaults.bg_dim);
     settings.bg_blur = std::clamp(settings.bg_blur, 0, 40);
+    settings.backdrop_blur_radius = std::clamp(settings.backdrop_blur_radius, 0, 40);
+    settings.backdrop_refresh_ms = std::clamp(settings.backdrop_refresh_ms, 100, 1000);
     settings.terminal_tint = bounded(settings.terminal_tint, 0.0, 0.88, defaults.terminal_tint);
     settings.background_blur_opacity = bounded(settings.background_blur_opacity, 0.0, 1.0, defaults.background_blur_opacity);
     settings.font_size = bounded(settings.font_size, 7.5, 26.0, defaults.font_size);
@@ -506,6 +513,8 @@ void SettingsStore::resetAppearance() {
     settings.opacity = defaults.opacity;
     settings.opaque_background = defaults.opaque_background;
     settings.background_blur_opacity = defaults.background_blur_opacity;
+    settings.backdrop_blur_radius = defaults.backdrop_blur_radius;
+    settings.backdrop_refresh_ms = defaults.backdrop_refresh_ms;
     settings.background = defaults.background;
     settings.bg_dim = defaults.bg_dim;
     settings.bg_blur = defaults.bg_blur;

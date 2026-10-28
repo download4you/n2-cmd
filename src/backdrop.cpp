@@ -13,32 +13,21 @@
 #include <windows.h>
 
 namespace {
-// The desktop is captured at half of its physical size. The sample is then
-// blurred and stretched back to the window, which is both cheap and gives the
-// soft wash the backdrop is meant to look like. Half resolution keeps the
-// stretched result smooth instead of blocky.
 constexpr int kDesktopScale = 2;
-// Blur radius in physical pixels; the sampler converts it to sample pixels.
-constexpr int kDesktopBlurRadius = 26;
-// Number of steps the cross-fade between two live samples runs over.
-constexpr int kFadeSteps = 6;
+constexpr int kFadeSteps = 3;
 }
 
 Backdrop::Backdrop(SettingsStore* store, QWidget* parent) : QWidget(parent), store_(store) {
     setObjectName("terminalBackdrop");
     setAttribute(Qt::WA_TranslucentBackground);
+    setAutoFillBackground(false);
     debounce_.setSingleShot(true);
     debounce_.setInterval(160);
     connect(&debounce_, &QTimer::timeout, this, &Backdrop::rebuild);
 
     sampler_ = new DesktopSampler(this);
-    // The sampler delivers from its worker thread, so the hand-off is queued
-    // explicitly; the image is then stored and repainted on the interface
-    // thread.
     connect(sampler_, &DesktopSampler::sampled, this,
             [this](const QImage& image, const QPoint& origin, double pixelsPerPixel) {
-                // The previous frame is kept for a short cross-fade, so the
-                // backdrop flows into its new content instead of popping.
                 fading_ = desktop_;
                 desktop_ = image;
                 desktopOrigin_ = origin;
@@ -48,7 +37,7 @@ Backdrop::Backdrop(SettingsStore* store, QWidget* parent) : QWidget(parent), sto
                 update();
             }, Qt::QueuedConnection);
 
-    fadeTimer_.setInterval(40);
+    fadeTimer_.setInterval(25);
     connect(&fadeTimer_, &QTimer::timeout, this, [this] {
         ++fadeStep_;
         if (fadeStep_ >= kFadeSteps || fading_.isNull()) { fadeTimer_.stop(); fading_ = {}; }
@@ -121,7 +110,8 @@ void Backdrop::applySettings() {
     }
     if (sampler_) {
         sampler_->setScale(kDesktopScale);
-        sampler_->setBlurRadius(kDesktopBlurRadius);
+        sampler_->setBlurRadius(store_->settings.backdrop_blur_radius);
+        sampler_->setRefreshInterval(store_->settings.backdrop_refresh_ms);
         sampler_->setActive(!store_->settings.opaque_background);
     }
     update();
@@ -152,11 +142,14 @@ void Backdrop::refresh() {
     if (sampler_ && !store_->settings.opaque_background) sampler_->refresh();
 }
 
+void Backdrop::stopSampling() {
+    if (!sampler_) return;
+    sampler_->setWindow(0);
+    sampler_->shutdown();
+}
+
 void Backdrop::paintDesktop(QPainter& painter) {
     if (desktop_.isNull() || desktopPixelsPerPixel_ <= 0.0 || !window_) return;
-    // The sample covers the whole virtual desktop, so the area under this window
-    // is picked by its position on the screen. The result stays locked to the
-    // desktop while the window is dragged instead of sliding along with it.
     HWND handle = reinterpret_cast<HWND>(window_);
     RECT client{};
     POINT origin{client.left, client.top};
@@ -168,16 +161,20 @@ void Backdrop::paintDesktop(QPainter& painter) {
     const QRectF visible = source.intersected(available);
     if (visible.isEmpty()) return;
     const QRectF target(rect());
-    // While a cross-fade runs, the outgoing frame is drawn first and the new
-    // one is blended over it, so the change reads as a smooth transition.
+    auto targetFor = [&](const QRectF& visibleArea) {
+        return QRectF(target.left() + (visibleArea.left() - source.left()) * target.width() / source.width(),
+                      target.top() + (visibleArea.top() - source.top()) * target.height() / source.height(),
+                      visibleArea.width() * target.width() / source.width(),
+                      visibleArea.height() * target.height() / source.height());
+    };
     if (!fading_.isNull()) {
         const QRectF fadingAvailable(QPointF(0, 0), QSizeF(fading_.size()));
         const QRectF fadingVisible = source.intersected(fadingAvailable);
-        if (!fadingVisible.isEmpty()) painter.drawImage(target, fading_, fadingVisible);
+        if (!fadingVisible.isEmpty()) painter.drawImage(targetFor(fadingVisible), fading_, fadingVisible);
         const qreal progress = qBound(0.0, qreal(fadeStep_) / qreal(kFadeSteps), 1.0);
-        painter.setOpacity(progress);
+        painter.setOpacity(painter.opacity() * progress);
     }
-    painter.drawImage(target, desktop_, visible);
+    painter.drawImage(targetFor(visible), desktop_, visible);
     painter.setOpacity(1.0);
 }
 

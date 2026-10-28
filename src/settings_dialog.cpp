@@ -1,4 +1,4 @@
-﻿#include "settings_dialog.h"
+#include "settings_dialog.h"
 #include "backdrop.h"
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -20,7 +20,6 @@
 #include <QVBoxLayout>
 
 namespace {
-// All labels in the form share one column so the controls line up.
 constexpr int kLabelWidth = 150;
 const QVector<QPair<QString, QString>> accentChoices = {
     {"Cyan", "#4cc9f0"}, {"Violet", "#9b8cff"}, {"Mint", "#3ddc97"}, {"Amber", "#ffb454"}, {"Rose", "#ff6f91"}
@@ -56,7 +55,7 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
     auto* heading = new QHBoxLayout;
     auto* titles = new QVBoxLayout;
     auto* title = new QLabel("Settings"); title->setObjectName("settingsTitle");
-    auto* subtitle = new QLabel("Make the terminal feel like yours."); subtitle->setObjectName("mutedLabel");
+    auto* subtitle = new QLabel("Choose how the terminal looks and behaves."); subtitle->setObjectName("mutedLabel");
     titles->addWidget(title); titles->addWidget(subtitle);
     heading->addLayout(titles); heading->addStretch();
     auto* close = new QPushButton(QString(QChar(0x00d7))); close->setObjectName("closeSettingsButton");
@@ -72,7 +71,34 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
     auto* body = new QVBoxLayout(content); body->setContentsMargins(0, 2, 12, 0); body->setSpacing(12);
     scroll->setWidget(content); layout->addWidget(scroll, 1);
 
-    section(body, "Background");
+    section(body, "Live background");
+    live_ = new QCheckBox("Use live blurred desktop behind the terminal"); live_->setObjectName("liveBackgroundCheck");
+    live_->setToolTip("Show and blur the windows behind the terminal instead of using a static wallpaper.");
+    body->addWidget(live_);
+    connect(live_, &QCheckBox::toggled, this, [this](bool enabled) {
+        if (loading_) return;
+        store_->settings.opaque_background = !enabled;
+        updateControlStates();
+        commit();
+    });
+    liveBlur_ = addSlider(body, "liveBlurSlider", "Live blur strength", 0, 40, 1, "px");
+    liveBlur_->setToolTip("Blur strength for the live desktop. Wallpaper blur is configured separately.");
+    refresh_ = addSlider(body, "refreshIntervalSlider", "Refresh every", 100, 1000, 1, "ms");
+    refresh_->setSingleStep(50); refresh_->setPageStep(100);
+    refresh_->setToolTip("How often the live background updates. Lower values are more responsive but use more CPU.");
+    blurOpacity_ = addSlider(body, "blurOpacitySlider", "Background visibility", 0, 100, 1, "%");
+    blurOpacity_->setToolTip("Controls how much of the live background is visible through the window.");
+    opacity_ = addSlider(body, "opacitySlider", "Window opacity", 30, 100, 1, "%");
+    dim_ = addSlider(body, "dimSlider", "Background dim", 0, 92, 1, "%");
+    auto* liveNote = new QLabel("Lower refresh times feel more responsive but use more CPU. Background dim also applies to wallpaper.");
+    liveNote->setObjectName("mutedLabel"); liveNote->setWordWrap(true); body->addWidget(liveNote);
+    connect(liveBlur_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.backdrop_blur_radius = value; commit(); } });
+    connect(refresh_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.backdrop_refresh_ms = value; commit(); } });
+    connect(blurOpacity_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.background_blur_opacity = value / 100.0; commit(); } });
+    connect(opacity_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.opacity = value / 100.0; commit(); } });
+    connect(dim_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.bg_dim = value / 100.0; commit(); } });
+
+    section(body, "Wallpaper (when live background is off)");
     auto* background = new QHBoxLayout;
     preview_ = new QLabel; preview_->setObjectName("wallpaperPreview"); preview_->setFixedSize(148, 78);
     preview_->setAlignment(Qt::AlignCenter); preview_->setAccessibleName("Wallpaper preview");
@@ -89,29 +115,8 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
     background->addLayout(options, 1); body->addLayout(background);
     connect(choose, &QPushButton::clicked, this, &SettingsDialog::chooseWallpaper);
     connect(reset, &QPushButton::clicked, this, [this] { store_->settings.background.clear(); updatePreview(); commit(); });
-
-    section(body, "Appearance");
-    opacity_ = addSlider(body, "opacitySlider", "Window opacity", 30, 100, 1, "%");
-    opaque_ = new QCheckBox("Keep the window background opaque"); opaque_->setObjectName("opaqueBackgroundCheck");
-    opaque_->setToolTip("Prevents text from other windows showing through the terminal. Turn off to use window opacity.");
-    body->addWidget(opaque_);
-    connect(opaque_, &QCheckBox::toggled, this, [this](bool enabled) {
-        if (loading_) return;
-        store_->settings.opaque_background = enabled;
-        opacity_->setEnabled(!enabled);
-        blurOpacity_->setEnabled(!enabled);
-        commit();
-    });
-    blurOpacity_ = addSlider(body, "blurOpacitySlider", "Background blur opacity", 0, 100, 1, "%");
-    blurOpacity_->setToolTip("Controls how much of the blurred background is visible through the window.");
-    connect(blurOpacity_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.background_blur_opacity = value / 100.0; commit(); } });
-    dim_ = addSlider(body, "dimSlider", "Background dim", 0, 92, 1, "%");
-    blur_ = addSlider(body, "blurSlider", "Background blur", 0, 40, 1, "px");
-    tint_ = addSlider(body, "tintSlider", "Terminal tint", 0, 88, 1, "%");
-    connect(opacity_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.opacity = value / 100.0; commit(); } });
-    connect(dim_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.bg_dim = value / 100.0; commit(); } });
+    blur_ = addSlider(body, "blurSlider", "Wallpaper blur", 0, 40, 1, "px");
     connect(blur_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.bg_blur = value; commit(); } });
-    connect(tint_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.terminal_tint = value / 100.0; commit(); } });
 
     section(body, "Terminal");
     auto* fontRow = new QHBoxLayout;
@@ -120,15 +125,12 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
     font_->addItems({"Vazir Code Hack", "Cascadia Mono", "Cascadia Code", "Consolas", "JetBrains Mono", "Fira Code", "Courier New"});
     fontRow->addWidget(font_, 1); body->addLayout(fontRow); fontLabel->setBuddy(font_);
     fontSize_ = addSlider(body, "fontSizeSlider", "Font size", 15, 52, 2, "pt");
+    tint_ = addSlider(body, "tintSlider", "Terminal tint", 0, 88, 1, "%");
     connect(font_, &QComboBox::currentTextChanged, this, [this](const QString& value) { if (!loading_ && !value.trimmed().isEmpty()) { store_->settings.font_family = value.trimmed(); commit(); } });
     connect(fontSize_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.font_size = value / 2.0; commit(); } });
-    copy_ = new QCheckBox("Copy automatically when I select text with the mouse"); copy_->setObjectName("copyOnSelectCheck");
-    body->addWidget(copy_);
-    connect(copy_, &QCheckBox::toggled, this, [this](bool enabled) { if (!loading_) { store_->settings.copy_on_select = enabled; commit(); } });
-    snap_ = new QCheckBox("Snap windows to screen edges"); snap_->setObjectName("snapWindowsCheck");
-    snap_->setToolTip("Drag the title bar to a screen edge or corner to tile the window; drag to the top to maximize.");
-    body->addWidget(snap_);
-    connect(snap_, &QCheckBox::toggled, this, [this](bool enabled) { if (!loading_) { store_->settings.snap_windows = enabled; commit(); } });
+    connect(tint_, &QSlider::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.terminal_tint = value / 100.0; commit(); } });
+
+    section(body, "Behavior");
     auto* shellRow = new QHBoxLayout;
     auto* shellLabel = new QLabel("Default shell"); shellLabel->setFixedWidth(kLabelWidth); shellRow->addWidget(shellLabel);
     shell_ = new QComboBox; shell_->setObjectName("defaultShellCombo"); shell_->setAccessibleName("Default shell");
@@ -141,8 +143,15 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
     scrollback_->setSingleStep(500); scrollback_->setSuffix(" lines"); scrollback_->setAccessibleName("Scrollback lines");
     historyRow->addWidget(scrollback_, 1); body->addLayout(historyRow); historyLabel->setBuddy(scrollback_);
     connect(scrollback_, &QSpinBox::valueChanged, this, [this](int value) { if (!loading_) { store_->settings.scrollback = value; commit(); } });
+    copy_ = new QCheckBox("Copy automatically when I select text with the mouse"); copy_->setObjectName("copyOnSelectCheck");
+    body->addWidget(copy_);
+    connect(copy_, &QCheckBox::toggled, this, [this](bool enabled) { if (!loading_) { store_->settings.copy_on_select = enabled; commit(); } });
+    snap_ = new QCheckBox("Snap windows to screen edges"); snap_->setObjectName("snapWindowsCheck");
+    snap_->setToolTip("Drag the title bar to a screen edge or corner to tile the window; drag to the top to maximize.");
+    body->addWidget(snap_);
+    connect(snap_, &QCheckBox::toggled, this, [this](bool enabled) { if (!loading_) { store_->settings.snap_windows = enabled; commit(); } });
 
-    section(body, "Accent");
+    section(body, "Accent color");
     auto* colors = new QHBoxLayout; colors->setSpacing(10);
     accents_ = new QButtonGroup(this); accents_->setExclusive(true);
     for (const auto& choice : accentChoices) {
@@ -154,6 +163,8 @@ SettingsDialog::SettingsDialog(SettingsStore* store, const QVector<ShellProfile>
         connect(color, &QPushButton::clicked, this, [this, choice] { store_->settings.accent = choice.second; updateStyle(); commit(); });
     }
     colors->addStretch(); body->addLayout(colors);
+
+    section(body, "Shortcuts");
     auto* help = new QLabel("Ctrl+Shift+T  new tab    Ctrl+Shift+W  close tab    Ctrl+Tab  cycle\n"
         "Ctrl+wheel  zoom    F2  rename tab    Ctrl+Shift+S  save output\n"
         "Ctrl+Shift+P  quick commands    F11  fullscreen\n"
@@ -182,15 +193,26 @@ QSlider* SettingsDialog::addSlider(QVBoxLayout* layout, const QString& name, con
 void SettingsDialog::loadControls() {
     loading_ = true;
     const auto& s = store_->settings;
-    opacity_->setValue(qRound(s.opacity * 100)); opacity_->setEnabled(!s.opaque_background); opaque_->setChecked(s.opaque_background);
-    blurOpacity_->setValue(qRound(s.background_blur_opacity * 100)); blurOpacity_->setEnabled(!s.opaque_background);
+    opacity_->setValue(qRound(s.opacity * 100));
+    blurOpacity_->setValue(qRound(s.background_blur_opacity * 100));
+    liveBlur_->setValue(s.backdrop_blur_radius);
+    refresh_->setValue(s.backdrop_refresh_ms);
     dim_->setValue(qRound(s.bg_dim * 100)); blur_->setValue(s.bg_blur); tint_->setValue(qRound(s.terminal_tint * 100));
     font_->setCurrentText(s.font_family); fontSize_->setValue(qRound(s.font_size * 2)); copy_->setChecked(s.copy_on_select); snap_->setChecked(s.snap_windows);
     int shellIndex = shell_->findData(s.default_shell == "cmd" ? "native" : s.default_shell);
     shell_->setCurrentIndex(shellIndex < 0 && shell_->count() ? 0 : shellIndex); scrollback_->setValue(s.scrollback);
     for (auto* button : accents_->buttons()) button->setChecked(button->property("accent").toString() == s.accent);
+    updateControlStates();
     loading_ = false; updatePreview();
 }
+
+void SettingsDialog::updateControlStates() {
+    const bool live = !store_->settings.opaque_background;
+    live_->setChecked(live);
+    for (QSlider* slider : {opacity_, blurOpacity_, liveBlur_, refresh_}) slider->setEnabled(live);
+    blur_->setEnabled(!live);
+}
+
 void SettingsDialog::commit() {
     store_->sanitize(); QString error;
     const bool saved = store_->save(&error);
@@ -210,7 +232,9 @@ void SettingsDialog::updateStyle() {
         "QSpinBox{color:#dce7f5;}"
         "QComboBox QAbstractItemView{background:#152133;color:#dce7f5;selection-background-color:#31506a;}"
         "QSlider::groove:horizontal{height:5px;background:#263448;border-radius:2px;} QSlider::sub-page:horizontal{background:%1;}"
+        "QSlider::groove:horizontal:disabled{background:#1a2330;}"
         "QSlider::handle:horizontal{width:14px;margin:-5px 0;background:#edf6ff;border:2px solid %1;border-radius:7px;}"
+        "QSlider::handle:horizontal:disabled{background:#69798e;border-color:#465464;}"
         "QScrollBar:vertical{background:transparent;width:8px;} QScrollBar::handle:vertical{background:#435269;border-radius:4px;min-height:24px;}"
         "QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{height:0;}"
     ).arg(store_->settings.accent));
@@ -244,4 +268,3 @@ void SettingsDialog::chooseWallpaper() {
     if (!path.isEmpty()) applyWallpaper(path);
 }
 void SettingsDialog::resetAppearance() { store_->resetAppearance(); updateStyle(); loadControls(); commit(); }
-

@@ -120,7 +120,11 @@ void verifyPersistenceAndMutations() {
     CHECK(store.settings.font_size == 10.0);
     CHECK(store.settings.accent == QStringLiteral("#3ddc97"));
     CHECK(store.settings.default_shell == QStringLiteral("native"));
+    CHECK(store.settings.backdrop_blur_radius == 26);
+    CHECK(store.settings.backdrop_refresh_ms == 200);
     store.settings.font_family = persian;
+    store.settings.backdrop_blur_radius = 32;
+    store.settings.backdrop_refresh_ms = 150;
     store.settings.window_x = -1920;
     store.settings.window_y = -480;
     store.settings.copy_on_select = false;
@@ -144,6 +148,8 @@ void verifyPersistenceAndMutations() {
     CHECK(!restored.settings.snap_windows);
     CHECK(!restored.settings.opaque_background);
     CHECK(restored.settings.background_blur_opacity == 0.25);
+    CHECK(restored.settings.backdrop_blur_radius == 32);
+    CHECK(restored.settings.backdrop_refresh_ms == 150);
     CHECK(restored.settings.favorite_commands.size() == 1);
     CHECK(restored.settings.favorite_commands.first().name == persian);
     CHECK(restored.settings.favorite_commands.first().command == QStringLiteral("echo ") + persian);
@@ -235,12 +241,14 @@ void verifyRecoveryAndLua() {
     const QString preferences = QDir(temporary.path()).filePath(QStringLiteral("preferences.lua"));
     const QString persian = QStringLiteral("\u0633\u0644\u0627\u0645");
     CHECK(writeFixture(preferences, (QStringLiteral("return { font_family = '") + persian +
-        QStringLiteral("', font_size = 14, accent = '#ff6f91', copy_on_select = false, pinned_commands = {'cwd'}, favorite_commands = {{name = '") +
+        QStringLiteral("', font_size = 14, accent = '#ff6f91', backdrop_blur_radius = 33, backdrop_refresh_ms = 175, copy_on_select = false, pinned_commands = {'cwd'}, favorite_commands = {{name = '") +
         persian + QStringLiteral("', command = 'echo hello'}} }")).toUtf8()));
     CHECK(store.load(&error));
     CHECK(store.settings.font_family == persian);
     CHECK(store.settings.font_size == 12.5);
     CHECK(store.settings.accent == QStringLiteral("#ff6f91"));
+    CHECK(store.settings.backdrop_blur_radius == 33);
+    CHECK(store.settings.backdrop_refresh_ms == 175);
     CHECK(!store.settings.copy_on_select);
     CHECK(!store.settings.maximized);
     CHECK(store.settings.pinned_commands == QStringList{QStringLiteral("cwd")});
@@ -286,6 +294,8 @@ void verifyRangesResetAndProfiles() {
     store.settings.opacity = -10;
     store.settings.bg_dim = 9;
     store.settings.bg_blur = 500;
+    store.settings.backdrop_blur_radius = 500;
+    store.settings.backdrop_refresh_ms = 1;
     store.settings.terminal_tint = -1;
     store.settings.font_size = 100;
     store.settings.scrollback = 1;
@@ -301,6 +311,8 @@ void verifyRangesResetAndProfiles() {
     CHECK(store.settings.opacity == 0.30);
     CHECK(store.settings.bg_dim == 0.92);
     CHECK(store.settings.bg_blur == 40);
+    CHECK(store.settings.backdrop_blur_radius == 40);
+    CHECK(store.settings.backdrop_refresh_ms == 100);
     CHECK(store.settings.terminal_tint == 0.0);
     CHECK(store.settings.font_size == 26.0);
     CHECK(store.settings.scrollback == 500);
@@ -320,8 +332,11 @@ void verifyRangesResetAndProfiles() {
     store.settings.favorite_commands = {{QStringLiteral("name"), QStringLiteral("echo safe")}};
     store.settings.font_size = 25;
     store.settings.background = QStringLiteral("example.png");
+    store.settings.backdrop_blur_radius = 99;
+    store.settings.backdrop_refresh_ms = 800;
     store.resetAppearance();
     CHECK(store.settings.font_size == 10 && store.settings.background.isEmpty());
+    CHECK(store.settings.backdrop_blur_radius == 26 && store.settings.backdrop_refresh_ms == 200);
     CHECK(store.settings.default_shell == QStringLiteral("pwsh") && !store.settings.copy_on_select);
     CHECK(store.settings.favorite_commands.size() == 1 && store.settings.pinned_commands.size() == 1);
     CHECK(store.settings.window_x == -120 && store.settings.scrollback == 500);

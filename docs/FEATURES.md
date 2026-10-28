@@ -1,4 +1,4 @@
-﻿# Feature coverage
+# Feature coverage
 
 n2-cmd is a C, C++ and Lua terminal for Windows. Qt Widgets provides the
 interface, Win32 ConPTY runs shell sessions, libvterm parses terminal output,
@@ -11,7 +11,9 @@ and Lua supplies configuration. Python is not an application dependency.
 | Window opacity | 30-100% |
 | Background image | PNG, JPEG, WebP and BMP; copied into the user profile |
 | Background dim | 0-92% |
-| Background blur | 0-40 px |
+| Wallpaper blur | 0-40 px; applies only to the static wallpaper |
+| Live blur strength | 0-40 px; 26 px default |
+| Live refresh interval | 100-1000 ms; 200 ms default. Lower values are more responsive but use more CPU |
 | Terminal tint | 0-88% |
 | Terminal font | Vazir Code Hack default; Cascadia Mono, Cascadia Code, Consolas, JetBrains Mono, Fira Code, Courier New and installed fonts |
 | Font size | 7.5-26 pt; 10 pt default |
@@ -21,8 +23,8 @@ and Lua supplies configuration. Python is not an application dependency.
 | Scrollback navigation | Mouse wheel; click or drag the right-hand scrollbar |
 | Window snapping | Drag to a screen edge or corner; on by default, toggle in Settings |
 | Opaque background | On by default; hides text from other windows. Disable for a blurred background |
-| Background blur opacity | 0-100%; controls the blurred background when opaque mode is off |
-| Live blurred background | Refreshes about every 700 ms; the blur stays aligned with the desktop behind the window and updates when the desktop changes |
+| Background visibility | 0-100%; controls the blurred background when opaque mode is off |
+| Live blurred background | Refreshes every 200 ms by default; blur strength and refresh interval are configurable in Settings; the blur stays aligned with the desktop behind the window and updates when the desktop changes |
 | TUI newline | Shift+Enter sends a native Shift+Enter key record |
 | Always on top | Pin button in the header |
 | Default shell | Any detected profile |
@@ -34,10 +36,10 @@ The minimum window size is 640 x 400. The default size is 1240 x 780.
 ## Blurred background
 
 With opaque mode off, the window shows a blurred copy of the desktop behind it.
-The copy is captured on a worker thread at a quarter of the screen resolution,
+The console's client region is captured on a worker thread at half resolution,
 blurred with a separable box blur, and cropped in physical screen pixels so the
 result stays aligned with the desktop while the window is moved or resized.
-Captures refresh roughly every 700 ms, so content behind the terminal updates
+Captures refresh every 200 ms by default, so content behind the terminal updates
 live. The terminal window is excluded from its own capture, which keeps the
 refresh free of flicker.
 

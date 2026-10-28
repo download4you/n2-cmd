@@ -11,9 +11,7 @@ class QPainter;
 class QPaintEvent;
 
 // Paints the terminal backdrop: either the wallpaper or a live, blurred copy of
-// the desktop that sits behind the window. The live copy is refreshed on a
-// timer, so content behind the terminal keeps showing through instead of
-// freezing a single screenshot taken at startup.
+// the desktop behind the window, refreshed continuously by DesktopSampler.
 class Backdrop : public QWidget {
     Q_OBJECT
 public:
@@ -24,6 +22,7 @@ public:
     void setWindow(quintptr window);
     void setRefreshInterval(int milliseconds);
     void refresh();
+    void stopSampling();
     QImage sourceImage() const;
     static bool importWallpaper(const QString& source, const QString& destination, QString* error = nullptr);
 signals:

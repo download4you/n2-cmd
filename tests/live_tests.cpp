@@ -101,6 +101,31 @@ private slots:
         const QString output = qEnvironmentVariable("N2_CMD_TEST_OUTPUT_DIR");
         if (!output.isEmpty()) { QDir().mkpath(output); QVERIFY(window.grab().save(QDir(output).filePath("live-terminal.png"))); }
     }
+    void sustainedTuiRedrawAndResize() {
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        SettingsStore store(directory.path());
+        QString error;
+        QVERIFY2(store.load(&error), qPrintable(error));
+        store.settings.opaque_background = false;
+        MainWindow window(&store, nativeProfiles(), nullptr, false);
+        window.resize(1040, 680);
+        window.show();
+        auto* view = window.terminalAt(0);
+        QVERIFY(view);
+        for (int pass = 0; pass < 160; ++pass) {
+            QByteArray frame = "\x1b[?1049h\x1b[H\x1b[2J\x1b[38;5;";
+            frame += QByteArray::number(40 + pass % 200) + "mKIMI_STRESS_" + QByteArray::number(pass);
+            frame += QStringLiteral(" سلام می‌روم 😀 █▉▊▋▌▍▎▏").toUtf8();
+            frame += "\x1b[0m\r\n\x1b[7m status: redrawing and resizing \x1b[0m\x1b[K";
+            view->feedForTest(frame);
+            if (pass % 4 == 0) {
+                window.resize(960 + (pass % 5) * 24, 620 + (pass % 3) * 20);
+                QApplication::processEvents();
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(view->plainText().contains("KIMI_STRESS_159"), 5000);
+    }
 };
 QTEST_MAIN(LiveTests)
 #include "live_tests.moc"

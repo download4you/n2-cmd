@@ -1,4 +1,4 @@
-﻿#include "main_window.h"
+#include "main_window.h"
 #include "backdrop.h"
 #include "chrome.h"
 #include "settings_dialog.h"
@@ -8,7 +8,6 @@
 #include <QCloseEvent>
 #include <QDateTime>
 #include <QDir>
-#include <QEventLoop>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QGuiApplication>
@@ -21,14 +20,12 @@
 #include <QMouseEvent>
 #include <QPainterPath>
 #include <QPalette>
-#include <QPixmap>
 #include <QRegularExpression>
 #include <QRegion>
 #include <QSaveFile>
 #include <QScreen>
 #include <QShortcut>
 #include <QStackedWidget>
-#include <QThread>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QWindow>
@@ -57,11 +54,11 @@ MainWindow::MainWindow(SettingsStore* store, QVector<ShellProfile> profiles, QWi
     setObjectName("mainWindow"); setWindowTitle("n2-cmd");
     setWindowIcon(QIcon(store_->assetPath("icon.png")));
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint);
-    setAttribute(Qt::WA_TranslucentBackground); setMinimumSize(860, 540);
+    setAttribute(Qt::WA_TranslucentBackground); setAutoFillBackground(false); setMinimumSize(860, 540);
     backdrop_ = new Backdrop(store_, this); setCentralWidget(backdrop_);
     auto* layout = new QVBoxLayout(backdrop_); layout->setContentsMargins(1, 1, 1, 1); layout->setSpacing(0);
     topbar_ = new TopBar(backdrop_); stack_ = new QStackedWidget(backdrop_); stack_->setObjectName("terminalStack");
-    stack_->setAttribute(Qt::WA_TranslucentBackground); status_ = new TerminalStatusBar(backdrop_);
+    stack_->setAttribute(Qt::WA_TranslucentBackground); stack_->setAutoFillBackground(false); status_ = new TerminalStatusBar(backdrop_);
     layout->addWidget(topbar_); layout->addWidget(stack_, 1); layout->addWidget(status_);
     geometryTimer_ = new QTimer(this); geometryTimer_->setSingleShot(true); geometryTimer_->setInterval(350);
     connect(geometryTimer_, &QTimer::timeout, this, &MainWindow::saveGeometryToSettings);
@@ -84,12 +81,12 @@ MainWindow::MainWindow(SettingsStore* store, QVector<ShellProfile> profiles, QWi
     qApp->installEventFilter(this);
     restoreGeometryFromSettings(); applySettings();
     newTab(store_->settings.default_shell);
-    backdrop_->setRefreshInterval(700);
 }
 
 MainWindow::~MainWindow() {
     qApp->removeEventFilter(this);
     for (const auto& tab : tabs_) if (tab.view) tab.view->shutdown();
+    if (backdrop_) backdrop_->stopSampling();
 }
 int MainWindow::tabCount() const { return tabs_.size(); }
 int MainWindow::currentIndex() const { return stack_->currentIndex(); }
@@ -308,7 +305,6 @@ void MainWindow::addFavoriteDialog() {
 
 void MainWindow::applySettings() {
     store_->sanitize(); setWindowOpacity(1.0);
-    updateBackdropEffect();
     QPalette palette = qApp->palette();
     palette.setColor(QPalette::Window, QColor("#0b111b")); palette.setColor(QPalette::WindowText, QColor("#e6eefb"));
     palette.setColor(QPalette::Base, QColor("#101827")); palette.setColor(QPalette::AlternateBase, QColor("#182434"));
@@ -432,7 +428,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event) {
     }
     if (event->type() == QEvent::Move && widget == this) {
         if (geometryTimer_) geometryTimer_->start();
-        if (backdrop_ && !store_->settings.opaque_background) backdrop_->update();
+        if (backdrop_ && !store_->settings.opaque_background) { backdrop_->refresh(); backdrop_->update(); }
     }
     return QMainWindow::eventFilter(object, event);
 }
@@ -442,31 +438,8 @@ void MainWindow::updateWindowMask() {
     // right and bottom edges under fractional display scaling.
     clearMask();
 }
-void MainWindow::updateBackdropEffect() {
-    HWND hwnd = reinterpret_cast<HWND>(winId());
-    enum { WCA_ACCENT_POLICY = 19 };
-    struct AccentPolicy { int state; int flags; int gradient; int animation; };
-    struct CompositionData { int attribute; void* data; SIZE_T size; };
-    using SetComposition = BOOL(WINAPI*)(HWND, CompositionData*);
-    static SetComposition setter = reinterpret_cast<SetComposition>(
-        GetProcAddress(GetModuleHandleW(L"user32.dll"), "SetWindowCompositionAttribute"));
-    if (!setter) return;
-    AccentPolicy policy{};
-    const bool blurred = !store_->settings.opaque_background;
-    if (blurred) {
-        policy.state = 4; // ACCENT_ENABLE_ACRYLICBLURBEHIND
-        policy.flags = 2;
-        policy.gradient = 0x551b110b;
-    }
-    CompositionData data{WCA_ACCENT_POLICY, &policy, sizeof(policy)};
-    if (!setter(hwnd, &data) && blurred) {
-        policy.state = 3; // ACCENT_ENABLE_BLURBEHIND
-        setter(hwnd, &data);
-    }
-}
 void MainWindow::showEvent(QShowEvent* event) {
     QMainWindow::showEvent(event);
-    updateBackdropEffect();
     backdrop_->setWindow(static_cast<quintptr>(winId()));
     backdrop_->refresh();
 }
@@ -496,6 +469,7 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
     QMainWindow::resizeEvent(event);
     updateWindowMask();
     if (geometryTimer_) geometryTimer_->start();
+    if (backdrop_ && !store_->settings.opaque_background) backdrop_->refresh();
 }
 void MainWindow::changeEvent(QEvent* event) {
     QMainWindow::changeEvent(event);

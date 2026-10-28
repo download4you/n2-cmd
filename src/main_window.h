@@ -79,7 +79,6 @@ private:
     void restoreGeometryFromSettings();
     void saveGeometryToSettings();
     void updateWindowMask();
-    void updateBackdropEffect();
     void beginWindowMove();
     void applySnapFromCursor();
     void showError(const QString& message);

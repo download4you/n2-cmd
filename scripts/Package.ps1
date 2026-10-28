@@ -54,13 +54,23 @@ Copy-Item -LiteralPath (Join-Path $project 'docs\FEATURES.md') -Destination (Joi
 $originalPath = $env:PATH
 try {
     $env:PATH = (Join-Path $QtRoot 'bin') + ';' + $originalPath
-    & $deploy --release --no-translations --no-plugins --no-network --no-svg --skip-plugin-types iconengines,generic,styles --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --no-compiler-runtime (Join-Path $stage 'n2-cmd.exe')
+    & $deploy --release --no-translations --no-plugins --no-network --skip-plugin-types iconengines,generic,styles --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --no-compiler-runtime (Join-Path $stage 'n2-cmd.exe')
     if ($LASTEXITCODE -ne 0) { throw 'Qt deployment failed.' }
 } finally { $env:PATH = $originalPath }
 
+$packaged = Join-Path $project 'dist\current'
+$packagedCore = Join-Path $packaged 'Qt6Core.dll'
+$canUsePackaged = $false
+if (Test-Path -LiteralPath $packagedCore -PathType Leaf) {
+    $canUsePackaged = (Get-Item -LiteralPath (Join-Path $QtRoot 'bin\Qt6Core.dll')).VersionInfo.ProductVersion -eq
+        (Get-Item -LiteralPath $packagedCore).VersionInfo.ProductVersion
+}
 $plugins = @('platforms\qwindows.dll', 'imageformats\qjpeg.dll', 'imageformats\qwebp.dll', 'imageformats\qgif.dll', 'imageformats\qico.dll')
 foreach ($plugin in $plugins) {
     $source = Join-Path (Join-Path $QtRoot 'plugins') $plugin
+    if (-not (Test-Path -LiteralPath $source -PathType Leaf) -and $canUsePackaged) {
+        $source = Join-Path $packaged $plugin
+    }
     if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { throw ('Required Qt plugin is missing; install Qt Image Formats: ' + $plugin) }
     $destination = Join-Path $stage $plugin
     New-Item -ItemType Directory -Path ([IO.Path]::GetDirectoryName($destination)) -Force | Out-Null

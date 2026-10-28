@@ -21,6 +21,7 @@ signals:
 private:
     QSlider* addSlider(QVBoxLayout* layout, const QString& name, const QString& title, int low, int high, double scale, const QString& suffix);
     void loadControls();
+    void updateControlStates();
     void commit();
     void updatePreview();
     void updateStyle();
@@ -29,8 +30,8 @@ private:
     bool loading_ = false;
     QLabel *preview_, *backgroundName_, *error_;
     QComboBox *font_, *shell_;
-    QCheckBox *copy_, *snap_, *opaque_;
+    QCheckBox *copy_, *snap_, *live_;
     QSpinBox* scrollback_;
     QButtonGroup* accents_;
-    QSlider *opacity_, *blurOpacity_, *dim_, *blur_, *tint_, *fontSize_;
+    QSlider *opacity_, *blurOpacity_, *dim_, *blur_, *liveBlur_, *refresh_, *tint_, *fontSize_;
 };

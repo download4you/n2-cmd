@@ -1,4 +1,4 @@
-﻿# n2-cmd
+# n2-cmd
 
 A native Windows terminal with Persian and mixed-direction text support,
 customizable appearance, multiple shells, and a built-in quick-command catalog.
@@ -36,7 +36,7 @@ not make that tool an application dependency.
 
 ## Install on Windows
 
-Download `n2-cmd-1.0.0-windows-x64-setup.exe` from GitHub Releases and run it.
+Download `n2-cmd-1.1.0-windows-x64-setup.exe` from GitHub Releases and run it.
 The installer uses a per-user installation under `%LOCALAPPDATA%\Programs\n2-cmd`,
 creates a Start Menu entry and optional desktop shortcut, and registers an
 uninstaller. Administrator rights are not required.
@@ -129,12 +129,12 @@ To build the executable installer after packaging, install Inno Setup 6 and run:
 & "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" .\installer\n2-cmd.iss
 ```
 
-The installer is written to `dist\n2-cmd-1.0.0-windows-x64-setup.exe`.
+The installer is written to `dist\n2-cmd-1.1.0-windows-x64-setup.exe`.
 
 To inspect an extracted package again:
 
 ```powershell
-.\scripts\Inspect-Package.ps1 -PackageDirectory .\dist\n2-cmd-1.0.0-windows-x64-<stamp>
+.\scripts\Inspect-Package.ps1 -PackageDirectory .\dist\n2-cmd-1.1.0-windows-x64-<stamp>
 ```
 
 ## Settings and Lua
@@ -182,7 +182,8 @@ to 2,000 Unicode characters. See [FEATURES.md](docs/FEATURES.md) for details.
 | Scroll back | Mouse wheel; click or drag the right scrollbar |
 | Snap the window | Drag the title bar to a screen edge or corner; toggle in Settings |
 | Keep the background opaque | On by default; disable in Settings for a blurred background |
-| Background blur opacity | Adjusts the blurred background when opaque mode is off |
+| Background visibility | Adjusts the live background when opaque mode is off |
+| Live blur strength and refresh | 0-40 px and 100-1000 ms; 26 px and 200 ms defaults |
 | Keep the window above other windows | Pin button in the header |
 | Zoom | Ctrl+mouse wheel |
 | Select text | Mouse drag |
