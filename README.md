@@ -14,7 +14,7 @@ and command definitions. It does not require Python at runtime.
   terminal input, and IME support.
 - Image backgrounds, opacity, dim, blur, tint, font/size selection, copy on
   selection, five accent colors, scrollback settings, and saved window geometry.
-- 28 quick commands in Network, System, Files, and Developer categories,
+- 42 quick commands in Network, System, Files, Developer, and ADB categories,
   with shell-specific command text.
 - Pin/unpin built-ins and add/run/remove custom favorites, saved as UTF-8.
 - Custom tab names that survive shell title updates and UTF-8 output export.
@@ -22,7 +22,7 @@ and command definitions. It does not require Python at runtime.
   Git Bash, and installed WSL distributions.
 
 The defaults retain Vazir Code Hack at 10 pt and the Mint accent. The complete
-option ranges and all 28 command names are listed in [FEATURES.md](docs/FEATURES.md).
+option ranges and all 42 command names are listed in [FEATURES.md](docs/FEATURES.md).
 Optional commands such as `python --version` inspect an installed tool; they do
 not make that tool an application dependency.
 

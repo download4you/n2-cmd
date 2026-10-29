@@ -60,7 +60,7 @@ available profile. Shell detection does not install shells or distributions.
 
 ## Quick commands
 
-The Lua catalog contains 28 entries with descriptions, shell-specific text and
+The Lua catalog contains 42 entries with descriptions, shell-specific text and
 the administrator flag. `settings_tests` checks each entry against a digest
 recorded for this release.
 
@@ -94,11 +94,28 @@ recorded for this release.
 | Developer | Docker containers | Yes |
 | Developer | Python version | Yes |
 | Developer | Node version | Yes |
+| ADB | Start ADB server | Yes |
+| ADB | Stop ADB server | Yes |
+| ADB | List ADB devices | Yes |
+| ADB | Show device state | Yes |
+| ADB | Show ADB version | Yes |
+| ADB | Connect local emulator | Yes |
+| ADB | Disconnect devices | Yes |
+| ADB | Open device shell | Yes |
+| ADB | Show device logs | Yes |
+| ADB | Install example APK | Yes |
+| ADB | Uninstall example package | Yes |
+| ADB | Push example file | Yes |
+| ADB | Pull example file | Yes |
+| ADB | Reboot device | Yes |
 
 Command availability still depends on the selected shell's installed tools.
 For example, the preserved CMD disk/startup commands use `wmic`, which some
 Windows installations do not include. The Python and Node version entries are
 optional commands for checking those tools; n2-cmd itself requires neither.
+ADB commands require Android platform-tools on `PATH` and a connected device
+where applicable. The install, uninstall, push and pull entries use example
+paths or package names that should be replaced before running them.
 
 ## Favorites and persistence
 

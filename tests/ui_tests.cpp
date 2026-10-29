@@ -431,11 +431,14 @@ void NativeUiTests::tabMenuTargetsStableIdentity() {
 }
 
 void NativeUiTests::quickCommandMenusAndPersistence() {
-    QTemporaryDir directory; SettingsStore store(directory.path()); QString error; QVERIFY(store.load(&error)); QCOMPARE(store.quickCommands.size(), 28);
+    QTemporaryDir directory; SettingsStore store(directory.path()); QString error; QVERIFY(store.load(&error)); QCOMPARE(store.quickCommands.size(), 42);
     MainWindow window(&store, profiles(), nullptr, false); std::unique_ptr<QMenu> menu(window.createQuickMenu());
     QVERIFY(action(menu.get(), "emptyFavoritesHint")); int commands = 0;
     for (auto* item : menu->findChildren<QAction*>()) if (item->objectName().startsWith("quick_")) { ++commands; QVERIFY(item->isEnabled()); }
-    QCOMPARE(commands, 28); QVERIFY(action(menu.get(), "quick_flush-dns")->text().contains("(admin)"));
+    QCOMPARE(commands, 42); QVERIFY(action(menu.get(), "quick_flush-dns")->text().contains("(admin)"));
+    auto* adb = menu->findChild<QMenu*>("quickCategory_ADB"); QVERIFY(adb); QCOMPARE(adb->actions().size(), 14);
+    QVERIFY(action(adb, "quick_adb-kill-server")); QVERIFY(action(adb, "quick_adb-devices")); QVERIFY(action(adb, "quick_adb-logcat"));
+    QVERIFY(menu->findChild<QMenu*>("pinCategory_ADB"));
     QAction* pin = action(menu.get(), "pin_cwd"); QVERIFY(pin); pin->trigger(); QVERIFY(store.settings.pinned_commands.contains("cwd"));
     QVERIFY(store.addFavorite(persian(), "echo hello", &error));
     std::unique_ptr<QMenu> favorites(window.createQuickMenu()); QVERIFY(action(favorites.get(), "favorite_builtin_cwd"));

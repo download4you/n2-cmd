@@ -55,7 +55,7 @@ void verifyCatalog() {
     QString error;
     CHECK(store.load(&error));
     CHECK(error.isEmpty());
-    CHECK(store.quickCommands.size() == 28);
+    CHECK(store.quickCommands.size() == 42);
     // Expected digests for this release; each covers key, label, category,
     // description, command mappings and the administrator flag.
     const struct { const char* key; const char* digest; } expected[] = {
@@ -87,8 +87,22 @@ void verifyCatalog() {
         {"docker-ps", "e2a2052202c192d3f1da6caa5c4b948deab8d74ccb16e1cc35b67d822b6a866e"},
         {"python-version", "9830d7f7dd4cae16e0ab6a1befc93a58be42a6e971acb3a6ef18eafd72b464a6"},
         {"node-version", "9b7b76a51a4fd8e20f50f829bb39aec57eb69bac294c60c17a85d4c795197968"},
+        {"adb-start-server", "a923e91acfb28204a32a5ee009e90be651d4bc33ea7dff49eea63a54c39e5bc2"},
+        {"adb-kill-server", "e6d81922082df24c882862f7e059aa8a61deaf19fb71d7cf571341a07e16be16"},
+        {"adb-devices", "c318f7640b0f87409d4defcd7e43005ef52c5d46d5aa3d5ddc82c0c80f632acb"},
+        {"adb-get-state", "5d3ba364e5bec73fcf970300cf5cb84174c5868a7ad79e982627ed8484bb8554"},
+        {"adb-version", "adbf51eaa0353674522805e3dd2270861efd6344e335e3b8eb7cddd705d1cf40"},
+        {"adb-connect", "34c5494001861202beeb0a69596ad4b4fa465334ab96d9e7b10c535849f568ec"},
+        {"adb-disconnect", "99346700581aacd95050b7a0399d7cc82409b1068ae2571d97feeb3f82531158"},
+        {"adb-shell", "4792c8997a2aaad8bd52a5e919a76fb6cafc061d3eac8b359f760c52ea7dab6b"},
+        {"adb-logcat", "129f01875188ace9d56647d6d5e6cb70c865dc0bd23ed34049c0a842f6c5000d"},
+        {"adb-install", "fd763dcc97cb634460da66e5dae991ceea664190d1fecfda1b861db2c0aeeda8"},
+        {"adb-uninstall", "2b7fac25607634668a3d9a3d57cd9311df2e9a60424f7286544515f1a24e48db"},
+        {"adb-push", "761cad89140298f95b2cc5039d38ee81c8ee6c315ce67bc049c4e274ea76109b"},
+        {"adb-pull", "5fdca028ffaa8c099cb45e2a711a6aa4e8ad6034d38fb03d6aae29ccca57183a"},
+        {"adb-reboot", "1d1b1efc26d9d7c653c61f6a5f139a1caaee7410d879b6ca68e2f6a9eb1b01c4"},
     };
-    for (int i = 0; i < 28; ++i) {
+    for (int i = 0; i < 42; ++i) {
         const auto* item = store.quickCommand(QLatin1String(expected[i].key));
         CHECK(item != nullptr);
         if (!item) continue;
@@ -229,7 +243,7 @@ void verifyRecoveryAndLua() {
     CHECK(writeFixture(store.settingsPath(), "{ broken JSON"));
     CHECK(!store.load(&error));
     CHECK(!error.isEmpty());
-    CHECK(store.quickCommands.size() == 28);
+    CHECK(store.quickCommands.size() == 42);
     CHECK(store.settings.font_size == 10.0);
     CHECK(readFixture(store.settingsPath()) == "{ broken JSON");
     CHECK(writeFixture(store.settingsPath(), "[]"));

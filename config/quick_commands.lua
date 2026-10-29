@@ -155,4 +155,74 @@ return {
         description = "Print the active Node.js version.",
         powershell = [[node --version]], cmd = [[node --version]], unix = [[node --version]],
     },
+    {
+        key = "adb-start-server", label = "Start ADB server", category = "ADB",
+        description = "Start the Android Debug Bridge server.",
+        powershell = [[adb start-server]], cmd = [[adb start-server]], unix = [[adb start-server]],
+    },
+    {
+        key = "adb-kill-server", label = "Stop ADB server", category = "ADB",
+        description = "Stop the Android Debug Bridge server.",
+        powershell = [[adb kill-server]], cmd = [[adb kill-server]], unix = [[adb kill-server]],
+    },
+    {
+        key = "adb-devices", label = "List ADB devices", category = "ADB",
+        description = "List connected Android devices and emulators.",
+        powershell = [[adb devices]], cmd = [[adb devices]], unix = [[adb devices]],
+    },
+    {
+        key = "adb-get-state", label = "Show device state", category = "ADB",
+        description = "Show the connection state of the selected device.",
+        powershell = [[adb get-state]], cmd = [[adb get-state]], unix = [[adb get-state]],
+    },
+    {
+        key = "adb-version", label = "Show ADB version", category = "ADB",
+        description = "Show the installed Android Debug Bridge version.",
+        powershell = [[adb version]], cmd = [[adb version]], unix = [[adb version]],
+    },
+    {
+        key = "adb-connect", label = "Connect local emulator", category = "ADB",
+        description = "Connect to an emulator at 127.0.0.1:5555.",
+        powershell = [[adb connect 127.0.0.1:5555]], cmd = [[adb connect 127.0.0.1:5555]], unix = [[adb connect 127.0.0.1:5555]],
+    },
+    {
+        key = "adb-disconnect", label = "Disconnect devices", category = "ADB",
+        description = "Disconnect all TCP/IP Android devices.",
+        powershell = [[adb disconnect]], cmd = [[adb disconnect]], unix = [[adb disconnect]],
+    },
+    {
+        key = "adb-shell", label = "Open device shell", category = "ADB",
+        description = "Open an interactive shell on the selected device.",
+        powershell = [[adb shell]], cmd = [[adb shell]], unix = [[adb shell]],
+    },
+    {
+        key = "adb-logcat", label = "Show device logs", category = "ADB",
+        description = "Show timestamped Android logs; press Ctrl+C to stop.",
+        powershell = [[adb logcat -v time]], cmd = [[adb logcat -v time]], unix = [[adb logcat -v time]],
+    },
+    {
+        key = "adb-install", label = "Install example APK", category = "ADB",
+        description = "Install ./app.apk; replace it with your APK path.",
+        powershell = [[adb install ./app.apk]], cmd = [[adb install ./app.apk]], unix = [[adb install ./app.apk]],
+    },
+    {
+        key = "adb-uninstall", label = "Uninstall example package", category = "ADB",
+        description = "Uninstall com.example.app; replace it with your package name.",
+        powershell = [[adb uninstall com.example.app]], cmd = [[adb uninstall com.example.app]], unix = [[adb uninstall com.example.app]],
+    },
+    {
+        key = "adb-push", label = "Push example file", category = "ADB",
+        description = "Copy ./local-file.txt to the device; replace the paths as needed.",
+        powershell = [[adb push ./local-file.txt /sdcard/local-file.txt]], cmd = [[adb push ./local-file.txt /sdcard/local-file.txt]], unix = [[adb push ./local-file.txt /sdcard/local-file.txt]],
+    },
+    {
+        key = "adb-pull", label = "Pull example file", category = "ADB",
+        description = "Copy /sdcard/local-file.txt from the device; replace the paths as needed.",
+        powershell = [[adb pull /sdcard/local-file.txt ./local-file.txt]], cmd = [[adb pull /sdcard/local-file.txt ./local-file.txt]], unix = [[adb pull /sdcard/local-file.txt ./local-file.txt]],
+    },
+    {
+        key = "adb-reboot", label = "Reboot device", category = "ADB",
+        description = "Reboot the selected Android device.",
+        powershell = [[adb reboot]], cmd = [[adb reboot]], unix = [[adb reboot]],
+    },
 }
