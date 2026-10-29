@@ -28,10 +28,12 @@ private slots:
             QCOMPARE(model.plainText(), value);
             for (int width : {3, 5, 4, 12, 8}) {
                 model.resize(width, 20);
+                if (length == 6) qInfo() << "Pending wrap" << width << model.plainText() << "history" << model.historyRows();
                 QCOMPARE(model.plainText(), value);
             }
             model.resize(3, 20);
             model.feed("X");
+            if (length == 6) qInfo() << "Pending wrap final" << model.plainText() << "history" << model.historyRows();
             QCOMPARE(model.plainText(), value + u'X');
         }
     }
@@ -82,6 +84,71 @@ private slots:
         QCOMPARE(model.plainText(), value);
         for (int width : {3, 5, 11, 8}) { model.resize(width, 20); QCOMPARE(model.plainText(), value); }
         model.feed("!"); QCOMPARE(model.plainText(), value + u'!');
+    }
+    void mixedDirectionTextDoesNotDuplicate() {
+        const QString expected = QStringLiteral(R"N2( ● سؤال خوبیه — نه، وابستگی به «نسخه‌ی اندروید» نیست؛ وابستگی به بیلد دقیق باینری و سیاست امنیتی است. توضیح می‌دهم چرا روی بعضی دیوایس‌ها ممکن است
+   بشکند:
+
+   ۱. باینری بازی (مهم‌ترین وابستگی). زنجیره روی ساختارهای دقیق libUE4.so سوار است: آفست frealloc=libUE4+0xb786320، چیدمان TString/Table/Node در
+   فورک لوا، نقشه‌ی opcodeها، و خود دو باگ دیکودر (LoadString و LoadDebug). این‌ها بین نسخه‌های بازی (4.6.0 → 4.6.1 → 4.7) و بین بیلد arm64 (موبایل)
+   و x64 (شبیه‌ساز) عوض می‌شوند. همان اپ و همان لوا اجرا می‌شود، ولی آدرس‌ها و حتی وجود باگ فرق می‌کند. اگر Tencent یکی از دو باگ را ببندد، همان مسیر
+   می‌میرد (برای همین bug2 ذخیره‌ی bug1 است).
+
+   ۲. الکییتور (Scudo). قانون seating که bug2 به آن وابسته است (آزادسازی یک hole → V همان را می‌گیرد) رفتار Scudo است، نه لوا. نسخه/کانفیگ Scudo
+   بین دیوایس‌ها فرق می‌کند: چک هدر، quarantine، MTE روی دستگاه‌های جدیدتر، و شبیه‌ساز (houdini) که اصلاً الکییتور دیگری دارد. کرش corrupted chunk
+   header که رفع کردیم دقیقاً از همین لایه می‌آمد.
+
+   ۳. سیاست امنیتی سیستم‌عامل (وابستگی واقعی به نسخه‌ی اندروید).
+   • /proc/self/mem: روی A13 باز، روی A16 بسته — برای همین مسیرهای جدا داریم. نسخه‌های جدیدتر ممکن است محدودتر کنند.
+   • mprotect برای پچ escape-stub روی صفحه‌ی کد libanort: روی دیوایس‌هایی با SELinux سخت‌گیرتر (execmod) ممکن است رد شود؛ آنجا ctor با «mprotect
+     failed» شکست امن می‌خورد، نه کرش.
+
+   ۴. آنچه قبلاً قابل‌حمل طراحی شده: pkg از cmdline، base کتابخانه‌ها از maps، گجت dlopen با پارس فایل lib (نه آفست ثابت)، page-size از رانتایم.
+   یعنی تفاوت برند (سامسونگ/ردمجیک/شیائومی) خودش مهم نیست — مهم این سه لایه است.
+
+   جمع‌بندی: روی هر دیوایسی که همان بیلد بازی + arm64 + Scudo + رفتار SELinux مشابه را داشته باشد، انتظار کار کردن داریم؛ اما این را نمی‌توان بدون
+   تست ادعا کرد، چون هر یک از این سه لایه می‌تواند متفاوت باشد. چک‌لیست پورت برای نسخه/دیوایس جدید: چک سایز libUE4، یافتن آفست‌های جدید
+   (frealloc/gadget/layoutها)، تست /proc/self/mem و mprotect، بعد بکتست کامل تا لابی.)N2");
+        QByteArray input = expected.toUtf8(); input.replace("\n", "\r\n");
+        QTemporaryDir directory;
+        SettingsStore settings(directory.path()); settings.settings.terminal_tint = 0;
+        ShellProfile profile; profile.key = QStringLiteral("native");
+        TerminalView view(&settings, profile, {}, nullptr, false);
+        view.model().resize(171, 56);
+        view.feedForTest(input);
+        const QString actualText = view.plainText();
+        int firstDifference = 0;
+        while (firstDifference < actualText.size() && firstDifference < expected.size()
+               && actualText[firstDifference] == expected[firstDifference]) ++firstDifference;
+        qInfo() << "Text lengths" << actualText.size() << expected.size() << "first difference" << firstDifference;
+        qInfo() << "Actual context" << actualText.mid(qMax(0, firstDifference - 100), 240);
+        qInfo() << "Expected context" << expected.mid(qMax(0, firstDifference - 100), 240);
+        QCOMPARE(actualText, expected);
+        for (int width : {140, 100, 80, 60, 171}) {
+            view.model().resize(width, 56);
+            const QString resized = view.plainText();
+            int difference = 0;
+            while (difference < resized.size() && difference < expected.size()
+                   && resized[difference] == expected[difference]) ++difference;
+            qInfo() << "Resize" << width << "lengths" << resized.size() << expected.size() << "first difference" << difference;
+            qInfo() << "Resized context" << resized.mid(qMax(0, difference - 100), 240);
+            qInfo() << "Expected context" << expected.mid(qMax(0, difference - 100), 240);
+            if (width == 171) {
+                for (int rowIndex = 0; rowIndex < qMin(10, view.model().rowCount()); ++rowIndex) {
+                    const auto row = view.model().row(rowIndex);
+                    QString text;
+                    for (const auto& cell : row.cells) text += cell.text.isEmpty() ? QStringLiteral(" ") : cell.text;
+                    qInfo() << "Row" << rowIndex << "continuation" << row.continuation << "text" << text;
+                }
+            }
+            QCOMPARE(resized, expected);
+        }
+        const QRectF cell = view.cellRect(0, 0);
+        view.resize(qCeil(171 * cell.width() + 37), qCeil(56 * cell.height() + 27));
+        QImage actual(view.size(), QImage::Format_ARGB32_Premultiplied); actual.fill(Qt::transparent);
+        { QPainter painter(&actual); view.render(&painter, {}, {}, QWidget::DrawChildren); }
+        const QString output = qEnvironmentVariable("N2_CMD_TEST_OUTPUT_DIR");
+        if (!output.isEmpty()) { QDir().mkpath(output); QVERIFY(actual.save(QDir(output).filePath(QStringLiteral("mixed-direction-terminal.png")))); }
     }
     void alternateScreen() {
         TerminalModel model(20, 4);

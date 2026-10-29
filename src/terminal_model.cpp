@@ -157,38 +157,11 @@ QString TerminalModel::textRange(QPoint start, QPoint end) const {
     return result;
 }
 
-void TerminalModel::reflowHistory(int width) {
-    std::deque<TerminalRow> result;
-    for (size_t index = 0; index < history_.size();) {
-        TerminalRow line;
-        line.continuation = history_[index].continuation;
-        QVector<TerminalCell> contents;
-        do {
-            const auto& source = history_[index];
-            int end = source.cells.size();
-            while (end && source.cells[end - 1].width != 0 && source.cells[end - 1].text.isEmpty()) --end;
-            for (int column = 0; column < end; ++column) if (source.cells[column].width) contents.append(source.cells[column]);
-            ++index;
-        } while (index < history_.size() && history_[index].continuation);
-        for (const auto& cell : contents) {
-            if (line.cells.size() + cell.width > width) {
-                result.push_back(line); line = {}; line.continuation = true;
-            }
-            line.cells.append(cell);
-            for (int extra = 1; extra < cell.width; ++extra) { TerminalCell filler; filler.width = 0; line.cells.append(filler); }
-        }
-        result.push_back(line);
-    }
-    history_ = std::move(result);
-    while (int(history_.size()) > historyLimit_) history_.pop_front();
-}
-
 void TerminalModel::resize(int width, int height) {
     width = std::max(2, width); height = std::max(1, height);
     if (width == columns() && height == screenRows()) return;
     rememberLines();
     vterm_set_size(term_, height, width);
-    reflowHistory(width);
     vterm_screen_flush_damage(screen_);
     emit changed();
 }

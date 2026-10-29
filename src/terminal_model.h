@@ -67,7 +67,6 @@ private:
     QByteArray titleBuffer_, directoryBuffer_;
     TerminalCell convert(const VTermScreenCell& cell) const;
     void rememberLines();
-    void reflowHistory(int columns);
     static int damageCallback(VTermRect, void*);
     static int cursorCallback(VTermPos, VTermPos, int, void*);
     static int propertyCallback(VTermProp, VTermValue*, void*);

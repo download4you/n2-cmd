@@ -544,9 +544,12 @@ static void resize_primary_reflow(VTermScreen *screen, int new_rows, int new_col
   int output_row = 0, output_col = 0;
   VTermPos cursor = { 0, 0 };
   int cursor_found = 0;
+  flowinfo[0].continuation = oldinfo[0].continuation;
   for(int row = 0; row < used_rows; row++) {
-    if(row && !oldinfo[row].continuation) { output_row++; output_col = 0; }
-    flowinfo[output_row].continuation = oldinfo[row].continuation;
+    if(row && !oldinfo[row].continuation) {
+      output_row++; output_col = 0;
+      flowinfo[output_row].continuation = oldinfo[row].continuation;
+    }
     int length = line_popcount(old, row, old_rows, old_cols);
     int target = fields->pos.col + fields->at_phantom;
     if(active && row == fields->pos.row && length == 0) {
